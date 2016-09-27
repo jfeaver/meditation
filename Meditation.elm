@@ -4,6 +4,8 @@ port module Meditation exposing(..)
 import Html exposing (Html, button, div, text)
 import Html.App as Html
 import Html.Events exposing (onClick)
+import String
+import List
 
 
 
@@ -19,12 +21,73 @@ main =
 -- MODEL
 
 
-type alias Model = Int
+type alias Model =
+  { month : String
+  , day : Int
+  , entry : Entry
+  }
+
+
+type alias Entry =
+  { morning : Reading
+  , evening : Reading
+  }
+
+
+type alias Reading =
+  { verses : List Verse
+  , reading : List String
+  }
+
+
+type alias Verse =
+  { passage : String
+  , reference : Reference
+  }
+
+
+type alias Reference =
+  { book : String
+  , chapter : Int
+  , verse : Int
+  }
 
 
 model : Model
 model =
-  0
+  { month = "january"
+  , day = 19
+  , entry =
+    { morning =
+      { verses =
+        [ { passage = "In the beginning..."
+          , reference =
+            { book = "genesis"
+            , chapter = 1
+            , verse = 1
+            }
+          }
+        ]
+      , reading =
+        [ "Too early today?"
+        ]
+      }
+    , evening =
+      { verses =
+        [ { passage = "In the beginning..."
+          , reference =
+            { book = "genesis"
+            , chapter = 1
+            , verse = 1
+            }
+          }
+        ]
+      , reading =
+        [ "You've made it to the end of the day"
+        ]
+      }
+    }
+  }
 
 
 
@@ -38,12 +101,7 @@ type Msg
 
 update : Msg -> Model -> Model
 update msg model =
-  case msg of
-    Increment ->
-      model + 1
-
-    Decrement ->
-      model - 1
+  model
 
 
 
