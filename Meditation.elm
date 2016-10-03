@@ -1,8 +1,9 @@
 port module Meditation exposing(..)
 
 
-import Html exposing (Html, button, div, text)
+import Html exposing (..)
 import Html.App as Html
+import Html.Attributes exposing(..)
 import Html.Events exposing (onClick)
 import String
 import List
@@ -110,8 +111,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ button [ onClick Decrement ] [ text "-" ]
-    , div [] [ text (toString model) ]
-    , button [ onClick Increment ] [ text "+" ]
+  div
+    [ class "container"
+    ]
+    [ div
+      [ id "main"
+      ]
+      [ h2 [] [text ("Reading For " ++ "TODO")]
+      ]
+    , div
+      [ id "footer"
+      ]
+      []
     ]
