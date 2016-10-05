@@ -1,4 +1,4 @@
-port module Meditation exposing(..)
+port module Meditation.App exposing(..)
 
 
 import Html.App as Html
@@ -22,8 +22,8 @@ main =
 
 
 update : Action -> Model -> (Model, Cmd Action)
-update msg model =
-  case msg of
+update action model =
+  case action of
     Increment ->
       (model, Cmd.none)
     Decrement ->
@@ -113,3 +113,4 @@ model =
     }
   }
 -}
+

@@ -4,7 +4,7 @@
     "repository": "https://github.com/jfeaver/meditation.git",
     "license": "BSD3",
     "source-directories": [
-        "."
+        "Meditation"
     ],
     "exposed-modules": [],
     "dependencies": {
