@@ -10,7 +10,7 @@ import Reading.Action exposing(Action(..))
 
 main =
   Html.program
-    { init = Reading.Model.init
+    { init = Reading.Model.init ChangeDate
     , view = Reading.View.view
     , update = update
     , subscriptions = subscriptions
