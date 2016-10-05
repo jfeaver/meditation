@@ -1,49 +1,27 @@
 port module Meditation exposing(..)
 
 
-import Html exposing (..)
 import Html.App as Html
-import Html.Attributes exposing(..)
-import Html.Events exposing (onClick)
-import String
-import List
-import Date exposing(Date)
-import Task
-import ReadingSelection exposing(ReadingSelection)
+import Reading.Model exposing (Model)
+import Reading.View
+import Reading.Action exposing(Action(..))
 
 
 
 main =
   Html.program
-    { init = init
-    , view = view
+    { init = Reading.Model.init
+    , view = Reading.View.view
     , update = update
     , subscriptions = subscriptions
     }
-
-
-init =
-  ReadingSelection.init ChangeDate
-
-
--- MODEL
-
-
-type alias Model = ReadingSelection
 
 
 
 -- UPDATE
 
 
-type Msg
-  = Increment
-  | Decrement
-  | ToggleMorningEvening
-  | ChangeDate Date
-
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Action -> Model -> (Model, Cmd Action)
 update msg model =
   case msg of
     Increment ->
@@ -52,49 +30,17 @@ update msg model =
       (model, Cmd.none)
     ToggleMorningEvening ->
       (model, Cmd.none)
-    ChangeDate date ->
-      (ReadingSelection.forDate date, Cmd.none)
+    ChangeDate readingSelection ->
+      (readingSelection, Cmd.none)
 
 
 
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model -> Sub Action
 subscriptions model =
   Sub.none
-
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-  div
-    [ class "container"
-    ]
-    [ div
-      [ id "main"
-      ]
-      [ h2 [] [text (viewReadingTitle model)]
-      ]
-    , div
-      [ id "footer"
-      ]
-      []
-    ]
-
-
-viewReadingTitle : Model -> String
-viewReadingTitle model =
-  "Reading for: "
-  ++ (ReadingSelection.timeOfDay model)
-  ++ ", "
-  ++ (ReadingSelection.month model)
-  ++ " "
-  ++ (ReadingSelection.day model)
-
 
 
 
