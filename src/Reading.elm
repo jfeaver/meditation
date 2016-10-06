@@ -1,15 +1,61 @@
-module Reading.View exposing (view)
+port module Reading exposing ( init, view, update, subscriptions )
 
+
+import Date exposing (Date)
+import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
-
-
--- import Html.Events exposing (onClick)
-
 import String
-import Date
-import Reading.Model exposing (Model)
-import Reading.Action exposing (Action(..))
+
+
+
+-- MODEL
+
+
+type alias Model =
+    Date
+
+
+initialModel =
+    Date.fromTime 506502000000
+
+
+init : ( Model, Cmd Action )
+init =
+    ( initialModel, (getCurrentDate ChangeDate) )
+
+
+getCurrentDate : (Model -> a) -> Cmd a
+getCurrentDate action =
+    Task.perform (\date -> action date) (\date -> action date) Date.now
+
+
+
+-- UPDATE
+
+
+type Action
+    = ChangeDate Model
+
+
+update : Action -> Model -> ( Model, Cmd Action )
+update action model =
+    case action of
+        ChangeDate model ->
+            ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Action
+subscriptions model =
+    Sub.none
+
+
+
+-- VIEW
 
 
 type TimeOfDay
