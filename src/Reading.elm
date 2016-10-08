@@ -1,12 +1,12 @@
-port module Reading exposing ( init, view, update, subscriptions )
-
+port module Reading exposing (init, view, update, subscriptions)
 
 import Date exposing (Date)
+import Date.Extra.Format
+import Date.Extra.Config.Config_en_us
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
-
 
 
 -- MODEL
@@ -58,11 +58,6 @@ subscriptions model =
 -- VIEW
 
 
-type TimeOfDay
-    = Morning
-    | Evening
-
-
 view : Model -> Html Action
 view model =
     div
@@ -92,68 +87,26 @@ title model =
 
 timeOfDay : Model -> String
 timeOfDay model =
-    case getTimeOfDay model of
-        Morning ->
-            "Morning"
-
-        Evening ->
-            "Evening"
-
-
-getTimeOfDay : Model -> TimeOfDay
-getTimeOfDay model =
     let
         hour =
             Date.hour model
     in
         if hour < 12 then
-            Morning
+            "Morning"
         else
-            Evening
+            "Evening"
 
 
 month : Model -> String
-month model =
-    case Date.month model of
-        Date.Jan ->
-            "January"
-
-        Date.Feb ->
-            "February"
-
-        Date.Mar ->
-            "March"
-
-        Date.Apr ->
-            "April"
-
-        Date.May ->
-            "May"
-
-        Date.Jun ->
-            "June"
-
-        Date.Jul ->
-            "July"
-
-        Date.Aug ->
-            "August"
-
-        Date.Sep ->
-            "September"
-
-        Date.Oct ->
-            "October"
-
-        Date.Nov ->
-            "November"
-
-        Date.Dec ->
-            "December"
+month =
+    date_format "%B"
 
 
 day : Model -> String
-day model =
-    model
-        |> Date.day
-        |> toString
+day =
+    date_format "%e"
+
+
+date_format : String -> Model -> String
+date_format =
+    Date.Extra.Format.format Date.Extra.Config.Config_en_us.config
