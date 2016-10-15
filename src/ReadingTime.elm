@@ -1,7 +1,7 @@
 module ReadingTime exposing
     ( ReadingTime
     , model
-    , modelFromDate
+    , sync
     , toggleMorningEvening
     , view
     )
@@ -10,6 +10,7 @@ module ReadingTime exposing
 import Date exposing (Date)
 import Date.Extra.Core
 import Date.Extra.I18n.I_en_us as English
+import Task exposing (Task)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -47,6 +48,16 @@ modelFromDate date =
         , month = Date.Extra.Core.monthToInt (Date.month date)
         , day = Date.day date
         }
+
+
+sync : Task x ReadingTime
+sync =
+    Task.andThen Date.now doModelFromDate
+
+
+doModelFromDate : Date -> Task x ReadingTime
+doModelFromDate date =
+    Task.succeed <| modelFromDate date
 
 
 

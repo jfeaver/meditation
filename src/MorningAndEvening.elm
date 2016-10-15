@@ -1,9 +1,7 @@
 port module MorningAndEvening exposing (init, view, update, subscriptions)
 
 import ReadingTime exposing (ReadingTime)
-import Date exposing (Date)
-import Date.Extra.Core
-import Date.Extra.I18n.I_en_us as English
+import Date
 import Task exposing (Task)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -25,11 +23,11 @@ model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, syncToday )
+    ( model, syncReading )
 
 
-syncToday : Cmd Msg
-syncToday =
+syncReading : Cmd Msg
+syncReading =
     let
         success =
             (\model -> Update model)
@@ -37,12 +35,17 @@ syncToday =
         failure =
             (\model -> Update model)
     in
-        Task.perform failure success getToday
+        Task.perform failure success (chainSyncs ReadingTime.sync)
 
 
-getToday : Task Model Model
-getToday =
-    Task.andThen Date.now (\date -> Task.succeed ({ readingTime = ReadingTime.modelFromDate date }))
+chainSyncs : Task x ReadingTime -> Task x Model
+chainSyncs readingTimeSync =
+    Task.andThen readingTimeSync (doUpdateReadingTime model)
+
+
+doUpdateReadingTime : Model -> ReadingTime -> Task x Model
+doUpdateReadingTime model readingTime =
+    Task.succeed <| { model | readingTime = readingTime }
 
 
 
