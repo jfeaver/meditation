@@ -21,6 +21,7 @@ model =
     { readingTime = ReadingTime.model
     }
 
+
 init : ( Model, Cmd Msg )
 init =
     ( model, syncReading )

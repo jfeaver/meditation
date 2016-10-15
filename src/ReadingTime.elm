@@ -1,11 +1,11 @@
-module ReadingTime exposing
-    ( ReadingTime
-    , model
-    , sync
-    , toggleMorningEvening
-    , view
-    )
-
+module ReadingTime
+    exposing
+        ( ReadingTime
+        , model
+        , sync
+        , toggleMorningEvening
+        , view
+        )
 
 import Date exposing (Date)
 import Date.Extra.Core
@@ -62,7 +62,6 @@ doModelFromDate date =
 
 
 -- UPDATE
-
 
 
 type Msg
