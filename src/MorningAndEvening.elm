@@ -1,4 +1,4 @@
-port module Reading exposing (init, view, update, subscriptions)
+port module MorningAndEvening exposing (init, view, update, subscriptions)
 
 import Date exposing (Date)
 import Date.Extra.Core
@@ -24,7 +24,7 @@ type TimeOfDay
     | Evening
 
 
-initialModel =
+model =
     { timeOfDay = Morning
     , month = 1
     , day = 19
@@ -33,7 +33,7 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, syncToday )
+    ( model, syncToday )
 
 
 syncToday : Cmd Msg
