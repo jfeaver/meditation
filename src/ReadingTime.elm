@@ -1,7 +1,7 @@
 module ReadingTime
     exposing
         ( ReadingTime
-        , Msg (..)
+        , Msg(..)
         , model
         , now
         , update

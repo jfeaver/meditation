@@ -51,7 +51,7 @@ update action model =
     case action of
         UpdateReadingTime readingMsg ->
             let
-                (newTime, fx) =
+                ( newTime, fx ) =
                     ReadingTime.update readingMsg model.readingTime
             in
                 ( { model | readingTime = newTime }
