@@ -2,7 +2,7 @@ module ReadingTime
     exposing
         ( ReadingTime
         , model
-        , sync
+        , now
         , toggleMorningEvening
         , view
         )
@@ -50,14 +50,9 @@ modelFromDate date =
         }
 
 
-sync : Task x ReadingTime
-sync =
-    Task.andThen Date.now doModelFromDate
-
-
-doModelFromDate : Date -> Task x ReadingTime
-doModelFromDate date =
-    Task.succeed <| modelFromDate date
+now : Task x ReadingTime
+now =
+    Task.map modelFromDate Date.now
 
 
 

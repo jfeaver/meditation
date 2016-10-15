@@ -31,22 +31,12 @@ syncReading : Cmd Msg
 syncReading =
     let
         success =
-            (\model -> Update model)
+            (\readingTime -> UpdateReadingTime readingTime)
 
         failure =
-            (\model -> Update model)
+            (\readingTime -> UpdateReadingTime readingTime)
     in
-        Task.perform failure success (chainSyncs ReadingTime.sync)
-
-
-chainSyncs : Task x ReadingTime -> Task x Model
-chainSyncs readingTimeSync =
-    Task.andThen readingTimeSync (doUpdateReadingTime model)
-
-
-doUpdateReadingTime : Model -> ReadingTime -> Task x Model
-doUpdateReadingTime model readingTime =
-    Task.succeed <| { model | readingTime = readingTime }
+        Task.perform failure success ReadingTime.now
 
 
 
@@ -54,18 +44,18 @@ doUpdateReadingTime model readingTime =
 
 
 type Msg
-    = Update Model
+    = UpdateReadingTime ReadingTime
     | ToggleMorningEvening
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        Update model ->
-            ( model, Cmd.none )
+        UpdateReadingTime readingTime ->
+            ( { model | readingTime = readingTime }, Cmd.none )
 
         ToggleMorningEvening ->
-            ( { readingTime = ReadingTime.toggleMorningEvening model.readingTime }, Cmd.none )
+            ( { model | readingTime = ReadingTime.toggleMorningEvening model.readingTime }, Cmd.none )
 
 
 
