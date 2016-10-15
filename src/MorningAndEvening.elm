@@ -1,8 +1,7 @@
 port module MorningAndEvening exposing (init, view, update, subscriptions)
 
 import ReadingTime exposing (ReadingTime)
-import Date
-import Task exposing (Task)
+import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -44,18 +43,20 @@ syncReading =
 
 
 type Msg
-    = UpdateReadingTime ReadingTime
-    | ToggleMorningEvening
+    = UpdateReadingTime ReadingTime.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        UpdateReadingTime readingTime ->
-            ( { model | readingTime = readingTime }, Cmd.none )
-
-        ToggleMorningEvening ->
-            ( { model | readingTime = ReadingTime.toggleMorningEvening model.readingTime }, Cmd.none )
+        UpdateReadingTime readingMsg ->
+            let
+                (newTime, fx) =
+                    ReadingTime.update readingMsg model.readingTime
+            in
+                ( { model | readingTime = newTime }
+                , Cmd.map UpdateReadingTime fx
+                )
 
 
 
@@ -80,7 +81,7 @@ view model =
             [ id "main"
             ]
             [ h2 [] [ ReadingTime.view model.readingTime ]
-            , button [ onClick ToggleMorningEvening ] [ text "toggle" ]
+            , button [ onClick (UpdateReadingTime ReadingTime.ToggleMorningEvening) ] [ text "toggle" ]
             ]
         , div
             [ id "footer"

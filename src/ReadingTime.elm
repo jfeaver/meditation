@@ -1,9 +1,10 @@
 module ReadingTime
     exposing
         ( ReadingTime
+        , Msg (..)
         , model
         , now
-        , toggleMorningEvening
+        , update
         , view
         )
 
@@ -12,8 +13,6 @@ import Date.Extra.Core
 import Date.Extra.I18n.I_en_us as English
 import Task exposing (Task)
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 
 
 type alias ReadingTime =
@@ -50,9 +49,9 @@ modelFromDate date =
         }
 
 
-now : Task x ReadingTime
+now : Task x Msg
 now =
-    Task.map modelFromDate Date.now
+    Task.map (\date -> Update (modelFromDate date)) Date.now
 
 
 
@@ -60,17 +59,30 @@ now =
 
 
 type Msg
-    = ToggleMorningEvening
+    = Update ReadingTime
+    | ToggleMorningEvening
 
 
-toggleMorningEvening : ReadingTime -> ReadingTime
-toggleMorningEvening model =
-    case model.timeOfDay of
+update : Msg -> ReadingTime -> ( ReadingTime, Cmd Msg )
+update action readingTime =
+    case action of
+        Update newTime ->
+            ( newTime, Cmd.none )
+
+        ToggleMorningEvening ->
+            ( { readingTime | timeOfDay = toggle readingTime }
+            , Cmd.none
+            )
+
+
+toggle : ReadingTime -> TimeOfDay
+toggle readingTime =
+    case readingTime.timeOfDay of
         Morning ->
-            { model | timeOfDay = Evening }
+            Evening
 
         Evening ->
-            { model | timeOfDay = Morning }
+            Morning
 
 
 
