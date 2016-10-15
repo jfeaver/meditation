@@ -1,5 +1,6 @@
 port module MorningAndEvening exposing (init, view, update, subscriptions)
 
+import ReadingTime exposing (ReadingTime)
 import Date exposing (Date)
 import Date.Extra.Core
 import Date.Extra.I18n.I_en_us as English
@@ -13,23 +14,14 @@ import Html.Events exposing (onClick)
 
 
 type alias Model =
-    { timeOfDay : TimeOfDay
-    , month : Int
-    , day : Int
+    { readingTime : ReadingTime
     }
 
 
-type TimeOfDay
-    = Morning
-    | Evening
-
-
+model : Model
 model =
-    { timeOfDay = Morning
-    , month = 1
-    , day = 19
+    { readingTime = ReadingTime.model
     }
-
 
 init : ( Model, Cmd Msg )
 init =
@@ -50,22 +42,7 @@ syncToday =
 
 getToday : Task Model Model
 getToday =
-    Task.andThen Date.now (\date -> Task.succeed (modelFromDate date))
-
-
-modelFromDate : Date -> Model
-modelFromDate date =
-    let
-        timeOfDay =
-            if (Date.hour date) < 12 then
-                Morning
-            else
-                Evening
-    in
-        { timeOfDay = timeOfDay
-        , month = Date.Extra.Core.monthToInt (Date.month date)
-        , day = Date.day date
-        }
+    Task.andThen Date.now (\date -> Task.succeed ({ readingTime = ReadingTime.modelFromDate date }))
 
 
 
@@ -84,17 +61,7 @@ update action model =
             ( model, Cmd.none )
 
         ToggleMorningEvening ->
-            ( toggleMorningEvening model, Cmd.none )
-
-
-toggleMorningEvening : Model -> Model
-toggleMorningEvening model =
-    case model.timeOfDay of
-        Morning ->
-            { model | timeOfDay = Evening }
-
-        Evening ->
-            { model | timeOfDay = Morning }
+            ( { readingTime = ReadingTime.toggleMorningEvening model.readingTime }, Cmd.none )
 
 
 
@@ -118,7 +85,7 @@ view model =
         [ div
             [ id "main"
             ]
-            [ h2 [] [ text (title model) ]
+            [ h2 [] [ ReadingTime.view model.readingTime ]
             , button [ onClick ToggleMorningEvening ] [ text "toggle" ]
             ]
         , div
@@ -126,28 +93,3 @@ view model =
             ]
             []
         ]
-
-
-title : Model -> String
-title model =
-    "Reading for: "
-        ++ (timeOfDay model)
-        ++ ", "
-        ++ (month model)
-        ++ " "
-        ++ (toString model.day)
-
-
-timeOfDay : Model -> String
-timeOfDay model =
-    case model.timeOfDay of
-        Morning ->
-            "Morning"
-
-        Evening ->
-            "Evening"
-
-
-month : Model -> String
-month =
-    .month >> Date.Extra.Core.intToMonth >> English.monthName
