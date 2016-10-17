@@ -6,6 +6,7 @@ module ReadingTime
         , now
         , update
         , view
+        , month
         )
 
 import Date exposing (Date)

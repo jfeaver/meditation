@@ -1,6 +1,7 @@
 port module MorningAndEvening exposing (init, view, update, subscriptions)
 
 import ReadingTime exposing (ReadingTime)
+import Reading exposing (Reading)
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,12 +13,14 @@ import Html.Events exposing (onClick)
 
 type alias Model =
     { readingTime : ReadingTime
+    , reading: Maybe Reading
     }
 
 
 model : Model
 model =
     { readingTime = ReadingTime.model
+    , reading = Nothing
     }
 
 
@@ -82,6 +85,7 @@ view model =
             ]
             [ h2 [] [ ReadingTime.view model.readingTime ]
             , button [ onClick (UpdateReadingTime ReadingTime.ToggleMorningEvening) ] [ text "toggle" ]
+            , p [] [ text (Reading.url model.readingTime) ]
             ]
         , div
             [ id "footer"
