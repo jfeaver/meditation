@@ -85,7 +85,7 @@ view model =
             ]
             [ h2 [] [ ReadingTime.view model.readingTime ]
             , button [ onClick (UpdateReadingTime ReadingTime.ToggleMorningEvening) ] [ text "toggle" ]
-            , p [] [ text (Reading.url model.readingTime) ]
+            , Reading.view (Maybe.withDefault Reading.model model.reading)
             ]
         , div
             [ id "footer"
