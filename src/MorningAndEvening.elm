@@ -13,7 +13,7 @@ import Html.Events exposing (onClick)
 
 type alias Model =
     { readingTime : ReadingTime
-    , reading: Maybe Reading
+    , reading : Maybe Reading
     }
 
 

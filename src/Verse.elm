@@ -10,10 +10,10 @@ import Html.Attributes exposing (..)
 
 type alias Verse =
     { passage : String
-    , reference:
-        { book: String
-        , chapter: Int
-        , verse: Int
+    , reference :
+        { book : String
+        , chapter : Int
+        , verse : Int
         }
     }
 

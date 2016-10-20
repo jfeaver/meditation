@@ -19,7 +19,7 @@ import Html.Attributes exposing (..)
 
 type alias Reading =
     { verses : List Verse
-    , paragraphs: List String
+    , paragraphs : List String
     }
 
 
