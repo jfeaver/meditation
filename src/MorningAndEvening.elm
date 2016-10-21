@@ -1,7 +1,7 @@
 port module MorningAndEvening exposing (init, view, update, subscriptions)
 
-import ReadingTime exposing (ReadingTime)
 import Reading exposing (Reading)
+import ReadingTime exposing (ReadingTime)
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -13,32 +13,27 @@ import Html.Events exposing (onClick)
 
 type alias Model =
     { readingTime : ReadingTime
-    , reading : Maybe Reading
+    , reading : Reading
     }
 
 
 model : Model
 model =
     { readingTime = ReadingTime.model
-    , reading = Nothing
+    , reading = Reading.model
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, syncReading )
+    ( model,  Cmd.none)
 
 
-syncReading : Cmd Msg
-syncReading =
-    let
-        success =
-            (\readingTime -> UpdateReadingTime readingTime)
-
-        failure =
-            (\readingTime -> UpdateReadingTime readingTime)
-    in
-        Task.perform failure success ReadingTime.now
+{-
+initReading : Cmd Msg
+initReading =
+    Task.perform updateReading updateReading Reading.init
+-}
 
 
 
@@ -46,13 +41,21 @@ syncReading =
 
 
 type Msg
-    = UpdateReadingTime ReadingTime.Msg
+    = UpdateReading
 
+
+{-
+updateReading : Reading -> Msg -> Reading
+updateReading reading =
+    UpdateReading reading
+-}
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        UpdateReadingTime readingMsg ->
+        UpdateReading ->
+            ( model, Cmd.none )
+            {-
             let
                 ( newTime, fx ) =
                     ReadingTime.update readingMsg model.readingTime
@@ -60,6 +63,7 @@ update action model =
                 ( { model | readingTime = newTime }
                 , Cmd.map UpdateReadingTime fx
                 )
+            -}
 
 
 
@@ -83,10 +87,13 @@ view model =
         [ div
             [ id "main"
             ]
+            [ text "content" ]
+            {-
             [ h2 [] [ ReadingTime.view model.readingTime ]
-            , button [ onClick (UpdateReadingTime ReadingTime.ToggleMorningEvening) ] [ text "toggle" ]
-            , Reading.view (Maybe.withDefault Reading.model model.reading)
+            , button [ onClick (UpdateReading Reading.ToggleMorningEvening) ] [ text "toggle" ]
+            , Reading.view Reading.model
             ]
+            -}
         , div
             [ id "footer"
             ]

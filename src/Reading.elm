@@ -33,12 +33,14 @@ model =
 url : ReadingTime -> String
 url readingTime =
     "/meditation/assets/readings/"
+        {-
         ++ (readingTime |> ReadingTime.month |> String.toLower)
         ++ "_"
         ++ (String.padLeft 2 ' ' (readingTime.day |> toString))
         ++ "_"
         ++ (readingTime |> ReadingTime.timeOfDay |> String.toLower)
         ++ ".json"
+        -}
 
 
 
