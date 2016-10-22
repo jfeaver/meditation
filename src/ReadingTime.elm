@@ -1,7 +1,7 @@
 module ReadingTime
     exposing
         ( ReadingTime
-        , TimeOfDay (..)
+        , TimeOfDay(..)
         , model
         , fromDate
         , now

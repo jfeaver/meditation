@@ -9,5 +9,5 @@ main =
         { init = MorningAndEvening.init
         , view = MorningAndEvening.view
         , update = MorningAndEvening.update
-        , subscriptions = MorningAndEvening.subscriptions
+        , subscriptions = always Sub.none
         }

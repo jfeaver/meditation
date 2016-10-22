@@ -1,4 +1,4 @@
-port module MorningAndEvening exposing (init, view, update, subscriptions)
+port module MorningAndEvening exposing (init, view, update)
 
 import Reading exposing (Reading)
 import ReadingTime exposing (ReadingTime)
@@ -26,12 +26,7 @@ model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model,  initReadingTime)
-
-
-initReadingTime : Cmd Msg
-initReadingTime =
-    Task.perform setReadingTime setReadingTime ReadingTime.now
+    ( model, initReadingTime )
 
 
 
@@ -55,12 +50,12 @@ update action model =
 
 
 
--- SUBSCRIPTIONS
+-- EFFECTS
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+initReadingTime : Cmd Msg
+initReadingTime =
+    Task.perform setReadingTime setReadingTime ReadingTime.now
 
 
 
@@ -77,11 +72,11 @@ view model =
             ]
             [ h2 [] [ text <| title model.readingTime ]
             ]
-            {-
-            , button [ onClick (UpdateReading Reading.ToggleMorningEvening) ] [ text "toggle" ]
-            , Reading.view Reading.model
-            ]
-            -}
+          {-
+             , button [ onClick (UpdateReading Reading.ToggleMorningEvening) ] [ text "toggle" ]
+             , Reading.view Reading.model
+             ]
+          -}
         , div
             [ id "footer"
             ]
@@ -91,7 +86,8 @@ view model =
 
 title : ReadingTime -> String
 title readingTime =
-    List.foldr (++) ""
+    List.foldr (++)
+        ""
         [ "Reading for: "
         , ReadingTime.timeOfDay readingTime
         , ", "
