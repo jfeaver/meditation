@@ -26,14 +26,12 @@ model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model,  Cmd.none)
+    ( model,  initReadingTime)
 
 
-{-
-initReading : Cmd Msg
-initReading =
-    Task.perform updateReading updateReading Reading.init
--}
+initReadingTime : Cmd Msg
+initReadingTime =
+    Task.perform setReadingTime setReadingTime ReadingTime.now
 
 
 
@@ -41,29 +39,19 @@ initReading =
 
 
 type Msg
-    = UpdateReading
+    = SetReadingTime ReadingTime
 
 
-{-
-updateReading : Reading -> Msg -> Reading
-updateReading reading =
-    UpdateReading reading
--}
+setReadingTime : ReadingTime -> Msg
+setReadingTime readingTime =
+    SetReadingTime readingTime
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        UpdateReading ->
-            ( model, Cmd.none )
-            {-
-            let
-                ( newTime, fx ) =
-                    ReadingTime.update readingMsg model.readingTime
-            in
-                ( { model | readingTime = newTime }
-                , Cmd.map UpdateReadingTime fx
-                )
-            -}
+        SetReadingTime readingTime ->
+            ( { model | readingTime = readingTime }, Cmd.none )
 
 
 
@@ -87,9 +75,9 @@ view model =
         [ div
             [ id "main"
             ]
-            [ text "content" ]
+            [ h2 [] [ text <| title model.readingTime ]
+            ]
             {-
-            [ h2 [] [ ReadingTime.view model.readingTime ]
             , button [ onClick (UpdateReading Reading.ToggleMorningEvening) ] [ text "toggle" ]
             , Reading.view Reading.model
             ]
@@ -98,4 +86,16 @@ view model =
             [ id "footer"
             ]
             []
+        ]
+
+
+title : ReadingTime -> String
+title readingTime =
+    List.foldr (++) ""
+        [ "Reading for: "
+        , ReadingTime.timeOfDay readingTime
+        , ", "
+        , ReadingTime.month readingTime
+        , " "
+        , toString readingTime.day
         ]

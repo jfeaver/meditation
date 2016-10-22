@@ -5,6 +5,8 @@ module ReadingTime
         , model
         , fromDate
         , now
+        , timeOfDay
+        , month
         )
 
 import Date exposing (Date)
@@ -54,53 +56,7 @@ now =
 
 
 
--- UPDATE
-{-
-
-type Msg
-    = Update ReadingTime
-    | ToggleMorningEvening
-
-
-update : Msg -> ReadingTime -> ( ReadingTime, Cmd Msg )
-update action readingTime =
-    case action of
-        Update newTime ->
-            ( newTime, Cmd.none )
-
-        ToggleMorningEvening ->
-            ( { readingTime | timeOfDay = toggle readingTime }
-            , Cmd.none
-            )
-
-
-toggle : ReadingTime -> TimeOfDay
-toggle readingTime =
-    case readingTime.timeOfDay of
-        Morning ->
-            Evening
-
-        Evening ->
-            Morning
--}
-
-
 -- VIEW
-{-
-
-view : ReadingTime -> Html msg
-view readingTime =
-    text (title readingTime)
-
-
-title : ReadingTime -> String
-title readingTime =
-    "Reading for: "
-        ++ (timeOfDay readingTime)
-        ++ ", "
-        ++ (month readingTime)
-        ++ " "
-        ++ (toString readingTime.day)
 
 
 timeOfDay : ReadingTime -> String
@@ -116,4 +72,3 @@ timeOfDay readingTime =
 month : ReadingTime -> String
 month =
     .month >> Date.Extra.Core.intToMonth >> English.monthName
--}
