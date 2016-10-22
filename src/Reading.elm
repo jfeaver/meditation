@@ -8,9 +8,10 @@ module Reading
         )
 
 import ReadingTime exposing (ReadingTime)
-import Verse exposing (Verse)
 import Http
 import Task exposing (Task)
+import String
+import Json.Decode exposing (..)
 
 
 -- MODEL
@@ -22,7 +23,20 @@ type alias Reading =
     }
 
 
-type Error = Http.Error
+type alias Verse =
+    { passage : String
+    , reference : Reference
+    }
+
+
+type alias Reference =
+    { book : String
+    , chapter : Int
+    , verse : Int
+    }
+
+
+type alias Error = Http.Error
 
 
 
@@ -35,41 +49,39 @@ model =
 
 url : ReadingTime -> String
 url readingTime =
-    "/meditation/assets/readings/"
+    List.foldr (++) ""
+    [ "/readings/"
+    , (readingTime |> ReadingTime.month |> String.toLower)
+    , "_"
+    , (String.padLeft 2 ' ' (readingTime.day |> toString))
+    , "_"
+    , (readingTime |> ReadingTime.timeOfDay |> String.toLower)
+    , ".json"
+    ]
 
 
 request : ReadingTime -> Task Error Reading
 request readingTime =
-    Task.succeed model
-
-{-
-   ++ (readingTime |> ReadingTime.month |> String.toLower)
-   ++ "_"
-   ++ (String.padLeft 2 ' ' (readingTime.day |> toString))
-   ++ "_"
-   ++ (readingTime |> ReadingTime.timeOfDay |> String.toLower)
-   ++ ".json"
--}
--- VIEW
+    Http.get decodeReading (url readingTime)
 
 
-{-
-view : Reading -> Html msg
-view model =
-    div
-        []
-        [ div
-            [ class "verses"
-            ]
-            (List.map Verse.view model.verses)
-        , div
-            [ class "reading"
-            ]
-            (List.map viewParagraph model.paragraphs)
-        ]
+decodeReading : Decoder Reading
+decodeReading =
+    object2 Reading
+        ("verses" := list decodeVerse)
+        ("reading" := list string)
 
 
-viewParagraph : String -> Html msg
-viewParagraph paragraph =
-    p [] []
--}
+decodeVerse : Decoder Verse
+decodeVerse =
+    object2 Verse
+        ("passage" := string)
+        ("reference" := decodeReference)
+
+
+decodeReference : Decoder Reference
+decodeReference =
+    object3 Reference
+        ("book" := string)
+        ("chapter" := int)
+        ("verse" := int)

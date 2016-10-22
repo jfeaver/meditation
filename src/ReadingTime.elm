@@ -56,7 +56,7 @@ now =
 
 
 
--- VIEW
+-- HELPERS
 
 
 timeOfDay : ReadingTime -> String
