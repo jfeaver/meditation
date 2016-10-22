@@ -35,6 +35,8 @@ init =
 
 type Msg
     = SetReadingTime ReadingTime
+    | Flash Reading.Error
+    | SetReading Reading
 
 
 setReadingTime : ReadingTime -> Msg
@@ -43,10 +45,18 @@ setReadingTime readingTime =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action model =
-    case action of
+update msg model =
+    case msg of
         SetReadingTime readingTime ->
-            ( { model | readingTime = readingTime }, Cmd.none )
+            ( { model | readingTime = readingTime }
+            , getReading readingTime
+            )
+
+        Flash error ->
+            ( model, Cmd.none )
+
+        SetReading reading ->
+            ( { model | reading = reading }, Cmd.none )
 
 
 
@@ -56,6 +66,18 @@ update action model =
 initReadingTime : Cmd Msg
 initReadingTime =
     Task.perform setReadingTime setReadingTime ReadingTime.now
+
+
+getReading : ReadingTime -> Cmd Msg
+getReading readingTime =
+    let
+        readingRequestFailed =
+            (\error -> Flash error)
+
+        setReading =
+            (\reading -> SetReading reading)
+    in
+        Task.perform readingRequestFailed setReading (Reading.request readingTime)
 
 
 

@@ -1,17 +1,16 @@
 module Reading
     exposing
         ( Reading
+        , Error
         , model
         , url
-        , view
+        , request
         )
 
 import ReadingTime exposing (ReadingTime)
 import Verse exposing (Verse)
 import Http
-import String
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Task exposing (Task)
 
 
 -- MODEL
@@ -21,6 +20,10 @@ type alias Reading =
     { verses : List Verse
     , paragraphs : List String
     }
+
+
+type Error = Http.Error
+
 
 
 model : Reading
@@ -35,6 +38,9 @@ url readingTime =
     "/meditation/assets/readings/"
 
 
+request : ReadingTime -> Task Error Reading
+request readingTime =
+    Task.succeed model
 
 {-
    ++ (readingTime |> ReadingTime.month |> String.toLower)
@@ -47,6 +53,7 @@ url readingTime =
 -- VIEW
 
 
+{-
 view : Reading -> Html msg
 view model =
     div
@@ -65,3 +72,4 @@ view model =
 viewParagraph : String -> Html msg
 viewParagraph paragraph =
     p [] []
+-}
