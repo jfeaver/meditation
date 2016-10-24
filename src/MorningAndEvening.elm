@@ -48,7 +48,10 @@ update msg model =
             )
 
         ReadingRequestFailed error ->
-            ( model, getReading model.readingTime )
+            let
+                _ = Debug.log "error" (toString error)
+            in
+                ( model, Cmd.none )
 
         SetReading reading ->
             ( { model | reading = reading }, Cmd.none )
@@ -81,12 +84,11 @@ view model =
             [ id "main"
             ]
             [ h2 [] [ text <| title model.readingTime ]
+            , div [ class "verses" ]
+                (List.map verse model.reading.verses)
+            , div [ class "reading-body" ]
+                (List.map paragraph model.reading.paragraphs)
             ]
-          {-
-             , button [ onClick (UpdateReading Reading.ToggleMorningEvening) ] [ text "toggle" ]
-             , Reading.view Reading.model
-             ]
-          -}
         , div
             [ id "footer"
             ]
@@ -105,3 +107,30 @@ title readingTime =
         , " "
         , toString readingTime.day
         ]
+
+
+verse : Reading.Verse -> Html Msg
+verse readingVerse =
+    blockquote
+        []
+        [ p [] [ text readingVerse.passage ]
+        , p
+            [ class "citation"
+            ]
+            [ text
+                (List.foldr (++) ""
+                    [ "-"
+                    , readingVerse.reference.book
+                    , " "
+                    , readingVerse.reference.chapter |> toString
+                    , ":"
+                    , readingVerse.reference.verse |> toString
+                    ]
+                )
+            ]
+        ]
+
+
+paragraph : String -> Html Msg
+paragraph readingParagraph =
+    p [] [ text readingParagraph ]

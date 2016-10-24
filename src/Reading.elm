@@ -1,6 +1,8 @@
 module Reading
     exposing
         ( Reading
+        , Verse
+        , Reference
         , Error
         , model
         , url
@@ -31,8 +33,8 @@ type alias Verse =
 
 type alias Reference =
     { book : String
-    , chapter : Int
-    , verse : Int
+    , chapter : String
+    , verse : String
     }
 
 
@@ -83,5 +85,5 @@ decodeReference : Decoder Reference
 decodeReference =
     object3 Reference
         ("book" := string)
-        ("chapter" := int)
-        ("verse" := int)
+        ("chapter" := string)
+        ("verse" := string)
