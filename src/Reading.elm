@@ -52,7 +52,7 @@ model =
 url : ReadingTime -> String
 url readingTime =
     List.foldr (++) ""
-    [ "/readings/"
+    [ "/meditation/readings/"
     , (readingTime |> ReadingTime.month |> String.toLower)
     , "_"
     , (String.padLeft 2 ' ' (readingTime.day |> toString))
