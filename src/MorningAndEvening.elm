@@ -6,6 +6,7 @@ import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Json.Encode
 
 
 -- MODEL
@@ -125,4 +126,4 @@ verse readingVerse =
 
 paragraph : String -> Html Msg
 paragraph readingParagraph =
-    p [] [ text readingParagraph ]
+    p [ property "innerHTML" (Json.Encode.string readingParagraph) ] []
