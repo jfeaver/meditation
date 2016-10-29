@@ -78,21 +78,13 @@ getReading readingTime =
 view : Model -> Html Msg
 view model =
     div
-        [ class "container"
+        [ id "main"
         ]
-        [ div
-            [ id "main"
-            ]
-            [ h2 [] [ text <| title model.readingTime ]
-            , div [ class "verses" ]
-                (List.map verse model.reading.verses)
-            , div [ class "reading-body" ]
-                (List.map paragraph model.reading.paragraphs)
-            ]
-        , div
-            [ id "footer"
-            ]
-            []
+        [ h2 [] [ text <| title model.readingTime ]
+        , div [ class "verses" ]
+            (List.map verse model.reading.verses)
+        , div [ class "reading-body" ]
+            (List.map paragraph model.reading.paragraphs)
         ]
 
 
@@ -122,9 +114,9 @@ verse readingVerse =
                     [ "-"
                     , readingVerse.reference.book
                     , " "
-                    , readingVerse.reference.chapter |> toString
+                    , readingVerse.reference.chapter
                     , ":"
-                    , readingVerse.reference.verse |> toString
+                    , readingVerse.reference.verse
                     ]
                 )
             ]
