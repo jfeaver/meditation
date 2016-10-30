@@ -38,6 +38,8 @@ type Msg
     = SetReadingTime ReadingTime
     | ReadingRequestFailed Reading.Error
     | SetReading Reading
+    | IncrementReadingTime
+    | DecrementReadingTime
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,6 +58,24 @@ update msg model =
 
         SetReading reading ->
             ( { model | reading = reading }, Cmd.none )
+
+
+        IncrementReadingTime ->
+            let
+                newReadingTime = ReadingTime.increment model.readingTime
+            in
+                ( { model | readingTime = newReadingTime }
+                , getReading newReadingTime
+                )
+
+
+        DecrementReadingTime ->
+            let
+                newReadingTime = ReadingTime.decrement model.readingTime
+            in
+                ( { model | readingTime = newReadingTime }
+                , getReading newReadingTime
+                )
 
 
 
@@ -81,12 +101,20 @@ view model =
     div
         [ id "main"
         ]
-        [ h2 [] [ text <| title model.readingTime ]
-        , timeOfDayToggle model.readingTime
-        , div [ class "verses" ]
-            (List.map verse model.reading.verses)
-        , div [ class "reading-body" ]
-            (List.map paragraph model.reading.paragraphs)
+        [ div [ class "article" ]
+            [ h2 [] [ text <| title model.readingTime ]
+            , timeOfDayToggle model.readingTime
+            , div [ class "verses" ]
+                (List.map verse model.reading.verses)
+            , div [ class "reading-body" ]
+                (List.map paragraph model.reading.paragraphs)
+            ]
+        , div [ class "nav-back", onClick DecrementReadingTime  ]
+            [ text "<"
+            ]
+        , div [ class "nav-forward", onClick IncrementReadingTime  ]
+            [ text ">"
+            ]
         ]
 
 
