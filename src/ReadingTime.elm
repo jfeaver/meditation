@@ -5,6 +5,8 @@ module ReadingTime
         , model
         , fromDate
         , now
+        , choose
+        , toggle
         , timeOfDay
         , month
         )
@@ -59,14 +61,24 @@ now =
 -- HELPERS
 
 
-timeOfDay : ReadingTime -> String
-timeOfDay readingTime =
+choose : ReadingTime -> a -> a -> a
+choose readingTime morningThing eveningThing =
     case readingTime.timeOfDay of
         Morning ->
-            "Morning"
+            morningThing
 
         Evening ->
-            "Evening"
+            eveningThing
+
+
+toggle : ReadingTime -> ReadingTime
+toggle readingTime =
+    { readingTime | timeOfDay = choose readingTime Evening Morning }
+
+
+timeOfDay : ReadingTime -> String
+timeOfDay readingTime =
+    choose readingTime "Morning" "Evening"
 
 
 month : ReadingTime -> String

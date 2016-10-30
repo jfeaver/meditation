@@ -82,6 +82,7 @@ view model =
         [ id "main"
         ]
         [ h2 [] [ text <| title model.readingTime ]
+        , timeOfDayToggle model.readingTime
         , div [ class "verses" ]
             (List.map verse model.reading.verses)
         , div [ class "reading-body" ]
@@ -127,3 +128,13 @@ verse readingVerse =
 paragraph : String -> Html Msg
 paragraph readingParagraph =
     p [ property "innerHTML" (Json.Encode.string readingParagraph) ] []
+
+
+timeOfDayToggle : ReadingTime -> Html Msg
+timeOfDayToggle readingTime =
+    let
+        setReadingTime = SetReadingTime (ReadingTime.toggle readingTime)
+    in
+        ReadingTime.choose readingTime
+            (img [ src "/assets/moon.png", onClick setReadingTime ] [])
+            (img [ src "/assets/sun.png",  onClick setReadingTime ] [])
