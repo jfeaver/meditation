@@ -52,26 +52,27 @@ update msg model =
 
         ReadingRequestFailed error ->
             let
-                _ = Debug.log "error" (toString error)
+                _ =
+                    Debug.log "error" (toString error)
             in
                 ( model, Cmd.none )
 
         SetReading reading ->
             ( { model | reading = reading }, Cmd.none )
 
-
         IncrementReadingTime ->
             let
-                newReadingTime = ReadingTime.increment model.readingTime
+                newReadingTime =
+                    ReadingTime.increment model.readingTime
             in
                 ( { model | readingTime = newReadingTime }
                 , getReading newReadingTime
                 )
 
-
         DecrementReadingTime ->
             let
-                newReadingTime = ReadingTime.decrement model.readingTime
+                newReadingTime =
+                    ReadingTime.decrement model.readingTime
             in
                 ( { model | readingTime = newReadingTime }
                 , getReading newReadingTime
@@ -109,10 +110,10 @@ view model =
             , div [ class "reading-body" ]
                 (List.map paragraph model.reading.paragraphs)
             ]
-        , div [ class "nav-back", onClick DecrementReadingTime  ]
+        , div [ class "nav-back", onClick DecrementReadingTime ]
             [ text "<"
             ]
-        , div [ class "nav-forward", onClick IncrementReadingTime  ]
+        , div [ class "nav-forward", onClick IncrementReadingTime ]
             [ text ">"
             ]
         ]
@@ -140,7 +141,8 @@ verse readingVerse =
             [ class "citation"
             ]
             [ text
-                (List.foldr (++) ""
+                (List.foldr (++)
+                    ""
                     [ "-"
                     , readingVerse.reference.book
                     , " "
@@ -161,8 +163,9 @@ paragraph readingParagraph =
 timeOfDayToggle : ReadingTime -> Html Msg
 timeOfDayToggle readingTime =
     let
-        setReadingTime = SetReadingTime (ReadingTime.toggle readingTime)
+        setReadingTime =
+            SetReadingTime (ReadingTime.toggle readingTime)
     in
         ReadingTime.choose readingTime
             (img [ src "/assets/moon.png", onClick setReadingTime ] [])
-            (img [ src "/assets/sun.png",  onClick setReadingTime ] [])
+            (img [ src "/assets/sun.png", onClick setReadingTime ] [])

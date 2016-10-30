@@ -92,7 +92,9 @@ month =
 fromTime : Time -> ReadingTime
 fromTime time =
     let
-        date = Date.fromTime time
+        date =
+            Date.fromTime time
+
         timeOfDay =
             if (Date.hour date) < 12 then
                 Morning

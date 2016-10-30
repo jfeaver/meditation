@@ -38,8 +38,8 @@ type alias Reference =
     }
 
 
-type alias Error = Http.Error
-
+type alias Error =
+    Http.Error
 
 
 model : Reading
@@ -51,15 +51,16 @@ model =
 
 url : ReadingTime -> String
 url readingTime =
-    List.foldr (++) ""
-    [ "/meditation/readings/"
-    , (readingTime |> ReadingTime.month |> String.toLower)
-    , "_"
-    , (String.padLeft 2 ' ' (readingTime.day |> toString))
-    , "_"
-    , (readingTime |> ReadingTime.timeOfDay |> String.toLower)
-    , ".json"
-    ]
+    List.foldr (++)
+        ""
+        [ "/meditation/readings/"
+        , (readingTime |> ReadingTime.month |> String.toLower)
+        , "_"
+        , (String.padLeft 2 ' ' (readingTime.day |> toString))
+        , "_"
+        , (readingTime |> ReadingTime.timeOfDay |> String.toLower)
+        , ".json"
+        ]
 
 
 request : ReadingTime -> Task Error Reading
