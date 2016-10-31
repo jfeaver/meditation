@@ -5,7 +5,8 @@ import ReadingTime exposing (ReadingTime)
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onWithOptions, defaultOptions)
+import Json.Decode
 import Json.Encode
 
 
@@ -15,6 +16,7 @@ import Json.Encode
 type alias Model =
     { readingTime : ReadingTime
     , reading : Reading
+    , displayReadingTimeSelect : Bool
     }
 
 
@@ -22,6 +24,7 @@ model : Model
 model =
     { readingTime = ReadingTime.model
     , reading = Reading.model
+    , displayReadingTimeSelect = False
     }
 
 
@@ -40,6 +43,8 @@ type Msg
     | SetReading Reading
     | IncrementReadingTime
     | DecrementReadingTime
+    | ToggleReadingTimeSelect
+    | HideReadingTimeSelect
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,6 +84,14 @@ update msg model =
                 )
 
 
+        ToggleReadingTimeSelect ->
+            ( { model | displayReadingTimeSelect = not model.displayReadingTimeSelect }, Cmd.none )
+
+
+        HideReadingTimeSelect ->
+            ( { model | displayReadingTimeSelect = False }, Cmd.none )
+
+
 
 -- EFFECTS
 
@@ -99,17 +112,22 @@ getReading readingTime =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ id "main"
-        ]
+    div [ id "main", onClick HideReadingTimeSelect ]
         [ div [ class "article" ]
             [ h2 [] [ text <| title model.readingTime ]
-            , timeOfDayToggle model.readingTime
             , div [ class "verses" ]
                 (List.map verse model.reading.verses)
             , div [ class "reading-body" ]
                 (List.map paragraph model.reading.paragraphs)
             ]
+        , div [ class (readingTimeSelectClass model) ]
+            [ text "selectbox"
+            , timeOfDayToggle model.readingTime
+            ]
+        , i
+            [ class "fa fa-calendar"
+            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Json.Decode.succeed ToggleReadingTimeSelect)
+            ] [ text "calendar" ]
         , div [ class "nav-back", onClick DecrementReadingTime ]
             [ text "<"
             ]
@@ -169,3 +187,13 @@ timeOfDayToggle readingTime =
         ReadingTime.choose readingTime
             (img [ src "/assets/moon.png", onClick setReadingTime ] [])
             (img [ src "/assets/sun.png", onClick setReadingTime ] [])
+
+
+readingTimeSelectClass : Model -> String
+readingTimeSelectClass model =
+    case model.displayReadingTimeSelect of
+        True ->
+            "reading-time-select"
+
+        False ->
+            "reading-time-select hidden"
