@@ -4,10 +4,13 @@ import Reading exposing (Reading)
 import ReadingTime exposing (ReadingTime)
 import Task
 import Html exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onWithOptions, defaultOptions)
 import Json.Decode
 import Json.Encode
+import DatePicker exposing (DatePicker)
+import Date -- TODO unexpose Date
 
 
 -- MODEL
@@ -17,6 +20,7 @@ type alias Model =
     { readingTime : ReadingTime
     , reading : Reading
     , displayReadingTimeSelect : Bool
+    , datePicker: DatePicker
     }
 
 
@@ -25,6 +29,7 @@ model =
     { readingTime = ReadingTime.model
     , reading = Reading.model
     , displayReadingTimeSelect = False
+    , datePicker = fst <| DatePicker.init DatePicker.defaultSettings
     }
 
 
@@ -45,6 +50,7 @@ type Msg
     | DecrementReadingTime
     | ToggleReadingTimeSelect
     | HideReadingTimeSelect
+    | ToDatePicker DatePicker.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -83,13 +89,31 @@ update msg model =
                 , getReading newReadingTime
                 )
 
-
         ToggleReadingTimeSelect ->
             ( { model | displayReadingTimeSelect = not model.displayReadingTimeSelect }, Cmd.none )
 
-
         HideReadingTimeSelect ->
             ( { model | displayReadingTimeSelect = False }, Cmd.none )
+
+        ToDatePicker msg ->
+            let
+                ( datePicker, datePickerFx, mDate ) =
+                    DatePicker.update msg datePicker
+
+                readingTime =
+                    case mDate of
+                        Nothing ->
+                            model.readingTime
+
+                        date ->
+                            Maybe.withDefault model.readingTime (Maybe.map ReadingTime.fromTime <| Maybe.map Date.toTime date)
+
+            in
+                { model
+                    | readingTime = readingTime
+                    , datePicker = datePicker
+                }
+                    ! [ Cmd.map ToDatePicker datePickerFx ]
 
 
 
@@ -122,6 +146,7 @@ view model =
             ]
         , div [ class (readingTimeSelectClass model) ]
             [ text "selectbox"
+            , DatePicker.view model.datePicker |> Html.App.map ToDatePicker
             , timeOfDayToggle model.readingTime
             ]
         , i

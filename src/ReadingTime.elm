@@ -10,6 +10,7 @@ module ReadingTime
         , decrement
         , timeOfDay
         , month
+        , fromTime -- TODO: unexpose this
         )
 
 import Time exposing (Time)
