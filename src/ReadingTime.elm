@@ -1,8 +1,15 @@
 module ReadingTime
     exposing
         ( ReadingTime
+        , Model
         , TimeOfDay(..)
+        , Msg(..)
         , model
+        , initCmd
+        , update
+        , toggleNode
+        , navigation
+        , selectTool
         , now
         , choose
         , toggle
@@ -17,11 +24,21 @@ import Date exposing (Date)
 import Date.Extra.Core
 import Date.Extra.I18n.I_en_us as English
 import Task exposing (Task)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onWithOptions, defaultOptions)
+import Json.Decode
+
+
+type alias Model =
+    { time : Time
+    , readingTime : ReadingTime
+    , showSelectTool : Bool
+    }
 
 
 type alias ReadingTime =
-    { time : Time
-    , timeOfDay : TimeOfDay
+    { timeOfDay : TimeOfDay
     , month : Int
     , day : Int
     }
@@ -32,18 +49,96 @@ type TimeOfDay
     | Evening
 
 
-model : ReadingTime
+model : Model
 model =
-    { time = 506502000000
-    , timeOfDay = Morning
-    , month = 1
-    , day = 19
-    }
+    let
+        time = 506502000000
+    in
+        { time = time
+        , readingTime = fromTime' time
+        , showSelectTool = False
+        }
 
 
-now : Task x ReadingTime
+initCmd : Cmd Msg
+initCmd =
+    Task.perform Set Set now
+
+
+
+-- UPDATE
+
+
+type Msg
+    = Set Model
+    | Increment
+    | Decrement
+    | ToggleSelect
+    | HideSelect
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Set model ->
+            ( model, Cmd.none )
+
+        Increment ->
+            ( increment model
+            , Cmd.none )
+
+        Decrement ->
+            ( decrement model
+            , Cmd.none )
+
+        ToggleSelect ->
+            ( { model | showSelectTool = not model.showSelectTool }
+            , Cmd.none )
+
+        HideSelect ->
+            ( { model | showSelectTool = False }
+            , Cmd.none )
+
+
+
+-- EFFECTS
+
+
+now : Task x Model
 now =
-    Task.map (\time -> fromTime time) Time.now
+    Task.map (\time -> fromTime time model) Time.now
+
+
+
+-- VIEW
+
+
+toggleNode : Model -> Html Msg
+toggleNode model =
+    div [ class (toggleClass model) ]
+        [ text "selectbox"
+        , timeOfDayToggle model
+        ]
+
+
+navigation : Model -> Html Msg
+navigation model =
+    div []
+        [ div [ class "nav-back", onClick Decrement ]
+            [ text "<"
+            ]
+        , div [ class "nav-forward", onClick Increment ]
+            [ text ">"
+            ]
+        ]
+
+
+selectTool : Model -> Html Msg
+selectTool model =
+    i
+        [ class "fa fa-calendar"
+        , onWithOptions "click" { defaultOptions | stopPropagation = True } (Json.Decode.succeed ToggleSelect)
+        ] [ text "calendar" ]
 
 
 
@@ -65,14 +160,14 @@ toggle readingTime =
     { readingTime | timeOfDay = choose readingTime Evening Morning }
 
 
-increment : ReadingTime -> ReadingTime
-increment readingTime =
-    fromTime (readingTime.time + 12 * Time.hour)
+increment : Model -> Model
+increment model =
+    fromTime (model.time + 12 * Time.hour) model
 
 
-decrement : ReadingTime -> ReadingTime
-decrement readingTime =
-    fromTime (readingTime.time - 12 * Time.hour)
+decrement : Model -> Model
+decrement model =
+    fromTime (model.time - 12 * Time.hour) model
 
 
 timeOfDay : ReadingTime -> String
@@ -89,8 +184,42 @@ month =
 -- UNEXPOSED
 
 
-fromTime : Time -> ReadingTime
-fromTime time =
+timeOfDayToggle : Model -> Html Msg
+timeOfDayToggle model =
+    let
+        setReadingTime =
+            Set
+                (
+                    { model
+                    | readingTime = toggle model.readingTime
+                    }
+                )
+    in
+        choose model.readingTime
+            (img [ src "/assets/moon.png", onClick setReadingTime ] [])
+            (img [ src "/assets/sun.png", onClick setReadingTime ] [])
+
+
+toggleClass : Model -> String
+toggleClass model =
+    case model.showSelectTool of
+        True ->
+            "reading-time-select"
+
+        False ->
+            "reading-time-select hidden"
+
+
+fromTime : Time -> Model -> Model
+fromTime time model =
+    { model
+    | time = time
+    , readingTime = fromTime' time
+    }
+
+
+fromTime' : Time -> ReadingTime
+fromTime' time =
     let
         date =
             Date.fromTime time
@@ -101,8 +230,7 @@ fromTime time =
             else
                 Evening
     in
-        { time = time
-        , timeOfDay = timeOfDay
+        { timeOfDay = timeOfDay
         , month = Date.Extra.Core.monthToInt (Date.month date)
         , day = Date.day date
         }

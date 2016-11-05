@@ -1,12 +1,12 @@
 port module MorningAndEvening exposing (init, view, update)
 
 import Reading exposing (Reading)
-import ReadingTime exposing (ReadingTime)
+import ReadingTime
 import Task
 import Html exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onWithOptions, defaultOptions)
-import Json.Decode
 import Json.Encode
 
 
@@ -14,7 +14,7 @@ import Json.Encode
 
 
 type alias Model =
-    { readingTime : ReadingTime
+    { readingTime : ReadingTime.Model
     , reading : Reading
     , displayReadingTimeSelect : Bool
     }
@@ -30,7 +30,7 @@ model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, initReadingTime )
+    ( model, Cmd.map ToReadingTime ReadingTime.initCmd )
 
 
 
@@ -38,22 +38,24 @@ init =
 
 
 type Msg
-    = SetReadingTime ReadingTime
+    = ToReadingTime ReadingTime.Msg
     | ReadingRequestFailed Reading.Error
     | SetReading Reading
-    | IncrementReadingTime
-    | DecrementReadingTime
-    | ToggleReadingTimeSelect
-    | HideReadingTimeSelect
+    | ClickOut
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetReadingTime readingTime ->
-            ( { model | readingTime = readingTime }
-            , getReading readingTime
-            )
+        ToReadingTime readingTimeMsg ->
+            let
+                ( readingTime, readingTimeCmd ) =
+                    ReadingTime.update readingTimeMsg model.readingTime
+
+            in
+                ( { model | readingTime = readingTime }
+                , getReading readingTime
+                )
 
         ReadingRequestFailed error ->
             let
@@ -65,45 +67,24 @@ update msg model =
         SetReading reading ->
             ( { model | reading = reading }, Cmd.none )
 
-        IncrementReadingTime ->
+        ClickOut ->
             let
-                newReadingTime =
-                    ReadingTime.increment model.readingTime
+                ( readingTime, readingTimeCmd ) =
+                    ReadingTime.update ReadingTime.HideSelect model.readingTime
+
             in
-                ( { model | readingTime = newReadingTime }
-                , getReading newReadingTime
+                ( { model | readingTime = readingTime }
+                , Cmd.map ToReadingTime readingTimeCmd
                 )
-
-        DecrementReadingTime ->
-            let
-                newReadingTime =
-                    ReadingTime.decrement model.readingTime
-            in
-                ( { model | readingTime = newReadingTime }
-                , getReading newReadingTime
-                )
-
-
-        ToggleReadingTimeSelect ->
-            ( { model | displayReadingTimeSelect = not model.displayReadingTimeSelect }, Cmd.none )
-
-
-        HideReadingTimeSelect ->
-            ( { model | displayReadingTimeSelect = False }, Cmd.none )
 
 
 
 -- EFFECTS
 
 
-initReadingTime : Cmd Msg
-initReadingTime =
-    Task.perform SetReadingTime SetReadingTime ReadingTime.now
-
-
-getReading : ReadingTime -> Cmd Msg
+getReading : ReadingTime.Model -> Cmd Msg
 getReading readingTime =
-    Task.perform ReadingRequestFailed SetReading (Reading.request readingTime)
+    Task.perform ReadingRequestFailed SetReading (Reading.request readingTime.readingTime)
 
 
 
@@ -112,7 +93,7 @@ getReading readingTime =
 
 view : Model -> Html Msg
 view model =
-    div [ id "main", onClick HideReadingTimeSelect ]
+    div [ id "main", onClick ClickOut ]
         [ div [ class "article" ]
             [ h2 [] [ text <| title model.readingTime ]
             , div [ class "verses" ]
@@ -120,24 +101,13 @@ view model =
             , div [ class "reading-body" ]
                 (List.map paragraph model.reading.paragraphs)
             ]
-        , div [ class (readingTimeSelectClass model) ]
-            [ text "selectbox"
-            , timeOfDayToggle model.readingTime
-            ]
-        , i
-            [ class "fa fa-calendar"
-            , onWithOptions "click" { defaultOptions | stopPropagation = True } (Json.Decode.succeed ToggleReadingTimeSelect)
-            ] [ text "calendar" ]
-        , div [ class "nav-back", onClick DecrementReadingTime ]
-            [ text "<"
-            ]
-        , div [ class "nav-forward", onClick IncrementReadingTime ]
-            [ text ">"
-            ]
+        , Html.App.map ToReadingTime (ReadingTime.toggleNode model.readingTime)
+        , Html.App.map ToReadingTime (ReadingTime.selectTool model.readingTime)
+        , Html.App.map ToReadingTime (ReadingTime.navigation model.readingTime)
         ]
 
 
-title : ReadingTime -> String
+title : ReadingTime.ReadingTime -> String
 title readingTime =
     List.foldr (++)
         ""
@@ -176,24 +146,3 @@ verse readingVerse =
 paragraph : String -> Html Msg
 paragraph readingParagraph =
     p [ property "innerHTML" (Json.Encode.string readingParagraph) ] []
-
-
-timeOfDayToggle : ReadingTime -> Html Msg
-timeOfDayToggle readingTime =
-    let
-        setReadingTime =
-            SetReadingTime (ReadingTime.toggle readingTime)
-    in
-        ReadingTime.choose readingTime
-            (img [ src "/assets/moon.png", onClick setReadingTime ] [])
-            (img [ src "/assets/sun.png", onClick setReadingTime ] [])
-
-
-readingTimeSelectClass : Model -> String
-readingTimeSelectClass model =
-    case model.displayReadingTimeSelect of
-        True ->
-            "reading-time-select"
-
-        False ->
-            "reading-time-select hidden"
