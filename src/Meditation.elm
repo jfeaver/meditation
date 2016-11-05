@@ -1,6 +1,7 @@
 module Meditation exposing (..)
 
 import ReadingTime exposing (ReadingTime)
+import EnglishReadingTime
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Task
@@ -45,4 +46,4 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (toString model.readingTime.time) ]
+        [ text (EnglishReadingTime.month model.readingTime) ]
