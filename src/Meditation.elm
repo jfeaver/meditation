@@ -1,6 +1,6 @@
 module Meditation exposing (..)
 
-import ReadingTime exposing (ReadingTime)
+import Time exposing (Time)
 import EnglishReadingTime
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,23 +8,23 @@ import Task
 
 
 type alias Model =
-    { readingTime : ReadingTime
+    { time : Time
     }
 
 
 type Msg
-    = SetReadingTime ReadingTime
+    = SetTime Time
 
 
 model : Model
 model =
-    { readingTime = ReadingTime.fromTime 506502000000
+    { time = 506502000000
     }
 
 
 init : (Model, Cmd Msg)
 init =
-    (model, Task.perform SetReadingTime SetReadingTime ReadingTime.now)
+    (model, Task.perform SetTime SetTime Time.now)
 
 
 
@@ -34,8 +34,8 @@ init =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        SetReadingTime readingTime ->
-            ( { model | readingTime = readingTime }
+        SetTime time ->
+            ( { model | time = time }
             , Cmd.none )
 
 
@@ -46,4 +46,18 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (EnglishReadingTime.month model.readingTime) ]
+        [ text (title model) ]
+
+
+title : Model -> String
+title model =
+    List.foldr (++)
+        ""
+        [ "Reading for: "
+        , EnglishReadingTime.timeOfDay model.time
+        , ", "
+        , EnglishReadingTime.month model.time
+        , " "
+        , EnglishReadingTime.day model.time
+        ]
+
