@@ -3,22 +3,27 @@ module Meditation exposing (..)
 import Time exposing (Time)
 import EnglishReadingTime
 import Html exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
 import Task
+import TimeSelect
 
 
 type alias Model =
     { time : Time
+    , timeSelect : TimeSelect.Model
     }
 
 
 type Msg
     = SetTime Time
+    | ToTimeSelect TimeSelect.Msg
 
 
 model : Model
 model =
     { time = 506502000000
+    , timeSelect = TimeSelect.model
     }
 
 
@@ -38,6 +43,16 @@ update msg model =
             ( { model | time = time }
             , Cmd.none )
 
+        ToTimeSelect timeSelectMsg ->
+            let
+                (timeSelect, timeSelectCmd) =
+                    TimeSelect.update timeSelectMsg model.timeSelect
+
+            in
+                ( { model | timeSelect = timeSelect }
+                , Cmd.map ToTimeSelect timeSelectCmd
+                )
+
 
 
 -- VIEW
@@ -46,7 +61,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (title model) ]
+        [ text (title model)
+        , Html.App.map ToTimeSelect <| TimeSelect.view model.timeSelect
+        ]
 
 
 title : Model -> String
