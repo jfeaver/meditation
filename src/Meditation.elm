@@ -20,16 +20,17 @@ type Msg
     | ToTimeSelect TimeSelect.Msg
 
 
-model : Model
-model =
-    { time = 506502000000
-    , timeSelect = TimeSelect.model
-    }
-
-
 init : (Model, Cmd Msg)
 init =
-    (model, Task.perform SetTime SetTime Time.now)
+    let
+        ( timeSelect, timeSelectCmd ) =
+            TimeSelect.init
+
+    in
+        { time = 506502000000
+        , timeSelect = timeSelect
+        }
+        ! [ Cmd.map ToTimeSelect timeSelectCmd, Task.perform SetTime SetTime Time.now ]
 
 
 

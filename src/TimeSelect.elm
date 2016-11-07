@@ -2,24 +2,34 @@ module TimeSelect exposing (..)
 
 import Time exposing (Time)
 import Html exposing (..)
+import Html.App
 import Html.Attributes exposing (..)
+import Date
+import DatePicker
 
 
 type alias Model =
-    { datePicker : Int
+    { datePicker : DatePicker.DatePicker
     , time : Time
     }
 
 
 type Msg
     = SetTime Time
+    | ToDatePicker DatePicker.Msg
 
 
-model : Model
-model =
-    { datePicker = 0
-    , time = 0
-    }
+init : ( Model, Cmd Msg )
+init =
+    let
+        ( datePicker, datePickerCmd ) =
+            DatePicker.init DatePicker.defaultSettings
+
+    in
+        { datePicker = datePicker
+        , time = 0
+        }
+        ! [ Cmd.map ToDatePicker datePickerCmd ]
 
 
 
@@ -33,6 +43,23 @@ update msg model =
             ( { model | time = time }
             , Cmd.none )
 
+        ToDatePicker datePickerMsg ->
+            let
+                (datePicker, datePickerCmd, mDate) =
+                    DatePicker.update datePickerMsg model.datePicker
+
+                time =
+                    case mDate of
+                        Nothing ->
+                            model.time
+
+                        Just date ->
+                            Date.toTime date
+
+            in
+                ( { model | datePicker = datePicker, time = time }
+                , Cmd.map ToDatePicker datePickerCmd )
+
 
 
 -- VIEW
@@ -40,4 +67,6 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    div []
+        [ Html.App.map ToDatePicker <| DatePicker.view model.datePicker
+        ]
