@@ -16,9 +16,13 @@ month time =
 timeOfDay : Time -> String
 timeOfDay time =
     let
-        hour = time |> Date.fromTime |> Date.hour
+        hour =
+            time |> Date.fromTime |> Date.hour
     in
-        if hour < 12 then "Morning" else "Evening"
+        if hour < 12 then
+            "Morning"
+        else
+            "Evening"
 
 
 day : Time -> String
