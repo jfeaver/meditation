@@ -7,17 +7,18 @@ import Html.App
 import Html.Attributes exposing (..)
 import Task
 import TimeSelect
+import Reading
+
+
+
+-- MODEL
 
 
 type alias Model =
     { time : Time
     , timeSelect : TimeSelect.Model
+    , reading : Reading.Model
     }
-
-
-type Msg
-    = SetTime Time
-    | ToTimeSelect TimeSelect.Msg
 
 
 init : ( Model, Cmd Msg )
@@ -25,16 +26,23 @@ init =
     let
         ( timeSelect, timeSelectCmd ) =
             TimeSelect.init
+
     in
-        ( { time = 506502000000
-          , timeSelect = timeSelect
-          }
-        , Cmd.map ToTimeSelect timeSelectCmd
-        )
+        { time = 506502000000
+        , timeSelect = timeSelect
+        , reading = Reading.model
+        }
+        ! [ Cmd.map ToTimeSelect timeSelectCmd ]
 
 
 
 -- UPDATE
+
+
+type Msg
+    = SetTime Time
+    | ToTimeSelect TimeSelect.Msg
+    | ToReading Reading.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -45,16 +53,30 @@ update msg model =
             , Cmd.none
             )
 
+        ToReading readingMsg ->
+            let
+                ( reading, readingCmd ) =
+                    Reading.update readingMsg model.reading
+
+            in
+                { model | reading = reading }
+                !
+                [ Cmd.map ToReading readingCmd ]
+
         ToTimeSelect timeSelectMsg ->
             let
                 ( timeSelect, timeSelectCmd ) =
                     TimeSelect.update timeSelectMsg model.timeSelect
 
+                succeedWithTime = Task.succeed timeSelect.time
+                succeedWithReadingTime = Task.succeed (Reading.NewReadingTime timeSelect.time)
+
             in
                 { model | timeSelect = timeSelect }
                 !
                 [ Cmd.map ToTimeSelect timeSelectCmd
-                , Task.perform SetTime SetTime (Task.succeed timeSelect.time)
+                , Task.perform SetTime SetTime succeedWithTime
+                , Task.perform ToReading ToReading succeedWithReadingTime
                 ]
 
 
@@ -67,6 +89,7 @@ view model =
     div []
         [ text (title model)
         , Html.App.map ToTimeSelect <| TimeSelect.view model.timeSelect
+        , Html.App.map ToReading <| Reading.view model.reading
         ]
 
 
