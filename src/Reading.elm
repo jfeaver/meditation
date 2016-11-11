@@ -12,7 +12,8 @@ import Html.Attributes exposing (..)
 
 
 type alias Model =
-    { verses : List Verse
+    { time : Time
+    , verses : List Verse
     , paragraphs : List String
     }
 
@@ -32,29 +33,35 @@ type alias Reference =
 
 model : Model
 model =
-    { verses = []
+    { time = 0
+    , verses = []
     , paragraphs = []
     }
 
 
 
--- UPDATE
-
-
-type Msg
-    = NewReadingTime Time
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        NewReadingTime time ->
-            ( model, Cmd.none )
-
-
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
-    div [] []
+view : msg -> Model -> Html msg
+view msg model =
+    div [ class "article" ]
+        [ h2 [] [ text <| title model.readingTime ]
+        , div [ class "verses" ]
+        (List.map verse model.reading.verses)
+        , div [ class "reading-body" ]
+        (List.map paragraph model.reading.paragraphs)
+        ]
+
+
+title : Model -> String
+title model =
+    List.foldr (++)
+        ""
+        [ "Reading for: "
+        , EnglishReadingTime.timeOfDay model.time
+        , ", "
+        , EnglishReadingTime.month model.time
+        , " "
+        , EnglishReadingTime.day model.time
+        ]

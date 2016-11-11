@@ -1,7 +1,6 @@
 module Meditation exposing (..)
 
 import Time exposing (Time)
-import EnglishReadingTime
 import Html exposing (..)
 import Html.App
 import Html.Attributes exposing (..)
@@ -42,26 +41,19 @@ init =
 type Msg
     = SetTime Time
     | ToTimeSelect TimeSelect.Msg
-    | ToReading Reading.Msg
+    | DoNothing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        DoNothing ->
+            ( model, Cmd.none )
+
         SetTime time ->
             ( { model | time = time }
             , Cmd.none
             )
-
-        ToReading readingMsg ->
-            let
-                ( reading, readingCmd ) =
-                    Reading.update readingMsg model.reading
-
-            in
-                { model | reading = reading }
-                !
-                [ Cmd.map ToReading readingCmd ]
 
         ToTimeSelect timeSelectMsg ->
             let
@@ -69,14 +61,12 @@ update msg model =
                     TimeSelect.update timeSelectMsg model.timeSelect
 
                 succeedWithTime = Task.succeed timeSelect.time
-                succeedWithReadingTime = Task.succeed (Reading.NewReadingTime timeSelect.time)
 
             in
                 { model | timeSelect = timeSelect }
                 !
                 [ Cmd.map ToTimeSelect timeSelectCmd
                 , Task.perform SetTime SetTime succeedWithTime
-                , Task.perform ToReading ToReading succeedWithReadingTime
                 ]
 
 
@@ -87,20 +77,6 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text (title model)
-        , Html.App.map ToTimeSelect <| TimeSelect.view model.timeSelect
-        , Html.App.map ToReading <| Reading.view model.reading
-        ]
-
-
-title : Model -> String
-title model =
-    List.foldr (++)
-        ""
-        [ "Reading for: "
-        , EnglishReadingTime.timeOfDay model.time
-        , ", "
-        , EnglishReadingTime.month model.time
-        , " "
-        , EnglishReadingTime.day model.time
+        [ Html.App.map ToTimeSelect <| TimeSelect.view model.timeSelect
+        , Reading.view DoNothing model.reading
         ]
