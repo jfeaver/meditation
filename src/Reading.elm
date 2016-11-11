@@ -1,21 +1,25 @@
-module Reading exposing (..)
+module Reading
+    exposing
+        ( Reading
+        , get
+        , view
+        )
 
 import Time exposing (Time)
-import EnglishReadingTime
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
-
 -- MODEL
 
 
-type alias Model =
-    { time : Time
-    , verses : List Verse
-    , paragraphs : List String
-    }
+type Reading
+    = Reading
+        { time : Time
+        , verses : List Verse
+        , paragraphs : List String
+        }
 
 
 type alias Verse =
@@ -31,37 +35,19 @@ type alias Reference =
     }
 
 
-model : Model
-model =
-    { time = 0
-    , verses = []
-    , paragraphs = []
-    }
+
+-- EFFECTS
+
+
+get : Time -> Reading
+get =
+    Debug.crash "Not Implemented"
 
 
 
 -- VIEW
 
 
-view : msg -> Model -> Html msg
-view msg model =
-    div [ class "article" ]
-        [ h2 [] [ text <| title model.readingTime ]
-        , div [ class "verses" ]
-        (List.map verse model.reading.verses)
-        , div [ class "reading-body" ]
-        (List.map paragraph model.reading.paragraphs)
-        ]
-
-
-title : Model -> String
-title model =
-    List.foldr (++)
-        ""
-        [ "Reading for: "
-        , EnglishReadingTime.timeOfDay model.time
-        , ", "
-        , EnglishReadingTime.month model.time
-        , " "
-        , EnglishReadingTime.day model.time
-        ]
+view : Reading -> Html msg
+view reading =
+    Debug.crash "Not Implemented"

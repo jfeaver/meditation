@@ -1,37 +1,24 @@
 module Meditation exposing (..)
 
 import Time exposing (Time)
-import Html exposing (..)
-import Html.App
-import Html.Attributes exposing (..)
-import Task
 import TimeSelect
-import Reading
-
+import Reading exposing (Reading)
+import Html exposing (Html)
 
 
 -- MODEL
 
 
-type alias Model =
-    { time : Time
-    , timeSelect : TimeSelect.Model
-    , reading : Reading.Model
-    }
+type Model
+    = Model
+        { time : Time
+        , reading : Reading
+        }
 
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        ( timeSelect, timeSelectCmd ) =
-            TimeSelect.init
-
-    in
-        { time = 506502000000
-        , timeSelect = timeSelect
-        , reading = Reading.model
-        }
-        ! [ Cmd.map ToTimeSelect timeSelectCmd ]
+    Debug.crash "Not Implemented"
 
 
 
@@ -39,35 +26,12 @@ init =
 
 
 type Msg
-    = SetTime Time
-    | ToTimeSelect TimeSelect.Msg
-    | DoNothing
+    = Never
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        DoNothing ->
-            ( model, Cmd.none )
-
-        SetTime time ->
-            ( { model | time = time }
-            , Cmd.none
-            )
-
-        ToTimeSelect timeSelectMsg ->
-            let
-                ( timeSelect, timeSelectCmd ) =
-                    TimeSelect.update timeSelectMsg model.timeSelect
-
-                succeedWithTime = Task.succeed timeSelect.time
-
-            in
-                { model | timeSelect = timeSelect }
-                !
-                [ Cmd.map ToTimeSelect timeSelectCmd
-                , Task.perform SetTime SetTime succeedWithTime
-                ]
+    Debug.crash "Not Implemented"
 
 
 
@@ -75,8 +39,5 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model =
-    div []
-        [ Html.App.map ToTimeSelect <| TimeSelect.view model.timeSelect
-        , Reading.view DoNothing model.reading
-        ]
+view mode =
+    Debug.crash "Not Implemented"
