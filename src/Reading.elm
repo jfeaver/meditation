@@ -1,14 +1,13 @@
 module Reading
     exposing
         ( Reading
+        , none
         , get
         , view
         )
 
 import Time exposing (Time)
-import Http
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html as H exposing (..)
 
 
 -- MODEL
@@ -35,13 +34,22 @@ type alias Reference =
     }
 
 
+none : Reading
+none =
+    Reading
+        { time = 0
+        , verses = []
+        , paragraphs = []
+        }
+
+
 
 -- EFFECTS
 
 
 get : Time -> Reading
-get =
-    Debug.crash "Not Implemented"
+get time =
+    none
 
 
 
@@ -50,4 +58,4 @@ get =
 
 view : Reading -> Html msg
 view reading =
-    Debug.crash "Not Implemented"
+    H.div [] []
