@@ -48,7 +48,7 @@ none =
 -- EFFECTS
 
 
-get : Time -> Task x Reading
+get : Time -> Task Time Reading
 get time =
     Task.succeed none
 

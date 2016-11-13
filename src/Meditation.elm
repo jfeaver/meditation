@@ -26,12 +26,15 @@ init =
     let
         ( datePicker', datePickerCmd ) =
             DatePicker.init DatePicker.defaultSettings
+
+        startTime =
+            0
     in
-        { time = 0
+        { time = startTime
         , reading = Reading.none
         , datePicker = datePicker'
         }
-            ! [ Task.perform identity SetTime Time.now
+            ! [ Task.perform identity (SetTime startTime) Time.now
               , Cmd.map ToDatePicker datePickerCmd
               ]
 
@@ -41,8 +44,9 @@ init =
 
 
 type Msg
-    = SetTime Time
+    = SetTime Time Time
     | SetReading Reading
+    | AlertReadingLoadError Time Time
     | ToDatePicker DatePicker.Msg
     | ToggleTimeOfDay
 
@@ -50,9 +54,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetTime time ->
+        SetTime previousTime time ->
             ( { model | time = time }
-            , Task.perform identity SetReading (Reading.get time)
+            , Task.perform (AlertReadingLoadError previousTime) SetReading (Reading.get time)
             )
 
         SetReading reading ->
@@ -60,8 +64,13 @@ update msg model =
             , Cmd.none
             )
 
+        AlertReadingLoadError previousTime failedTime ->
+            ( { model | time = previousTime }
+            , Cmd.none
+            )
+
         ToggleTimeOfDay ->
-            ( model, setTime (TimeOfDay.toggle model.time) )
+            ( model, setTime model.time (TimeOfDay.toggle model.time) )
 
         ToDatePicker msg ->
             let
@@ -77,7 +86,7 @@ update msg model =
                             Date.toTime date
             in
                 { model | datePicker = datePicker' }
-                    ! [ setTime time
+                    ! [ setTime model.time time
                       , Cmd.map ToDatePicker datePickerCmd
                       ]
 
@@ -86,9 +95,9 @@ update msg model =
 -- EFFECTS
 
 
-setTime : Time -> Cmd Msg
-setTime time =
-    Task.perform identity SetTime (Task.succeed time)
+setTime : Time -> Time -> Cmd Msg
+setTime previousTime newTime =
+    Task.perform identity (SetTime previousTime) (Task.succeed newTime)
 
 
 
