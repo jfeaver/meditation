@@ -8,6 +8,7 @@ module Reading
 
 import Time exposing (Time)
 import Html as H exposing (..)
+import Task exposing (Task)
 
 
 -- MODEL
@@ -47,9 +48,9 @@ none =
 -- EFFECTS
 
 
-get : Time -> Reading
+get : Time -> Task x Reading
 get time =
-    none
+    Task.succeed none
 
 
 

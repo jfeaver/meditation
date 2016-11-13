@@ -5,8 +5,10 @@ import Date
 import DatePicker exposing (DatePicker)
 import Reading exposing (Reading)
 import Html as H exposing (Html)
+import Html.Events as HE
 import Html.App
 import Task
+import TimeOfDay
 
 
 -- MODEL
@@ -40,7 +42,9 @@ init =
 
 type Msg
     = SetTime Time
+    | SetReading Reading
     | ToDatePicker DatePicker.Msg
+    | ToggleTimeOfDay
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,8 +52,16 @@ update msg model =
     case msg of
         SetTime time ->
             ( { model | time = time }
+            , Task.perform identity SetReading (Reading.get time)
+            )
+
+        SetReading reading ->
+            ( { model | reading = reading }
             , Cmd.none
             )
+
+        ToggleTimeOfDay ->
+            ( model, setTime (TimeOfDay.toggle model.time) )
 
         ToDatePicker msg ->
             let
@@ -65,9 +77,18 @@ update msg model =
                             Date.toTime date
             in
                 { model | datePicker = datePicker' }
-                    ! [ Task.perform identity SetTime (Task.succeed time)
+                    ! [ setTime time
                       , Cmd.map ToDatePicker datePickerCmd
                       ]
+
+
+
+-- EFFECTS
+
+
+setTime : Time -> Cmd Msg
+setTime time =
+    Task.perform identity SetTime (Task.succeed time)
 
 
 
@@ -77,5 +98,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     H.div []
-        [ Html.App.map ToDatePicker (DatePicker.view model.datePicker)
+        [ H.text (toString model.time)
+        , H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
+        , Html.App.map ToDatePicker (DatePicker.view model.datePicker)
+        , Reading.view model.reading
         ]
