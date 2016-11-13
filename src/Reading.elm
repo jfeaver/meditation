@@ -50,7 +50,7 @@ none =
 
 get : Time -> Task Time Reading
 get time =
-    Task.succeed none
+    Task.fail time
 
 
 

@@ -1,7 +1,7 @@
 module Meditation exposing (..)
 
 import Time exposing (Time)
-import Date
+import Date exposing (Date)
 import DatePicker exposing (DatePicker)
 import Reading exposing (Reading)
 import Html as H exposing (Html)
@@ -26,17 +26,19 @@ init =
     let
         ( datePicker', datePickerCmd ) =
             DatePicker.init DatePicker.defaultSettings
-
-        startTime =
-            0
     in
-        { time = startTime
+        { time = initTime
         , reading = Reading.none
         , datePicker = datePicker'
         }
-            ! [ Task.perform identity (SetTime startTime) Time.now
-              , Cmd.map ToDatePicker datePickerCmd
+            ! [ Task.perform identity (SetTime initTime) Time.now
+              , Cmd.map (ToDatePicker True) datePickerCmd
               ]
+
+
+initTime : Time
+initTime =
+    0
 
 
 
@@ -47,7 +49,7 @@ type Msg
     = SetTime Time Time
     | SetReading Reading
     | AlertReadingLoadError Time Time
-    | ToDatePicker DatePicker.Msg
+    | ToDatePicker Bool DatePicker.Msg
     | ToggleTimeOfDay
 
 
@@ -65,30 +67,38 @@ update msg model =
             )
 
         AlertReadingLoadError previousTime failedTime ->
-            ( { model | time = previousTime }
-            , Cmd.none
-            )
+            let
+                mDate =
+                    if previousTime == initTime then
+                        Nothing
+                    else
+                        Just (Date.fromTime previousTime)
+
+                settings =
+                    DatePicker.defaultSettings
+
+                ( datePicker, datePickerCmd ) =
+                    DatePicker.init { settings | pickedDate = mDate }
+            in
+                { model
+                    | time = previousTime
+                    , datePicker = datePicker
+                }
+                    ! [ Cmd.map (ToDatePicker False) datePickerCmd ]
 
         ToggleTimeOfDay ->
             ( model, setTime model.time (TimeOfDay.toggle model.time) )
 
-        ToDatePicker msg ->
+        ToDatePicker doSetTime msg ->
             let
                 ( datePicker', datePickerCmd, mDate ) =
                     DatePicker.update msg model.datePicker
 
-                time =
-                    case mDate of
-                        Nothing ->
-                            model.time
-
-                        Just date ->
-                            Date.toTime date
+                commands =
+                    datePickerFollowUp doSetTime mDate model
             in
                 { model | datePicker = datePicker' }
-                    ! [ setTime model.time time
-                      , Cmd.map ToDatePicker datePickerCmd
-                      ]
+                    ! List.append commands [ Cmd.map (ToDatePicker doSetTime) datePickerCmd ]
 
 
 
@@ -100,6 +110,19 @@ setTime previousTime newTime =
     Task.perform identity (SetTime previousTime) (Task.succeed newTime)
 
 
+datePickerFollowUp : Bool -> Maybe Date -> Model -> List (Cmd Msg)
+datePickerFollowUp doSetTime mDate model =
+    if doSetTime then
+        case mDate of
+            Nothing ->
+                []
+
+            Just date ->
+                [ setTime model.time (Date.toTime date) ]
+    else
+        []
+
+
 
 -- VIEW
 
@@ -109,6 +132,6 @@ view model =
     H.div []
         [ H.text (toString model.time)
         , H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
-        , Html.App.map ToDatePicker (DatePicker.view model.datePicker)
+        , Html.App.map (ToDatePicker True) (DatePicker.view model.datePicker)
         , Reading.view model.reading
         ]
