@@ -7,19 +7,20 @@ module Reading
         )
 
 import Time exposing (Time)
-import Html as H exposing (..)
+import Html as H exposing (Html)
 import Task exposing (Task)
+import ReadingTime
+import String
 
 
 -- MODEL
 
 
-type Reading
-    = Reading
-        { time : Time
-        , verses : List Verse
-        , paragraphs : List String
-        }
+type alias Reading =
+    { time : Time
+    , verses : List Verse
+    , paragraphs : List String
+    }
 
 
 type alias Verse =
@@ -37,11 +38,10 @@ type alias Reference =
 
 none : Reading
 none =
-    Reading
-        { time = 0
-        , verses = []
-        , paragraphs = []
-        }
+    { time = 0
+    , verses = []
+    , paragraphs = []
+    }
 
 
 
@@ -50,7 +50,7 @@ none =
 
 get : Time -> Task Time Reading
 get time =
-    Task.fail time
+    Task.succeed { none | time = time }
 
 
 
@@ -59,4 +59,29 @@ get time =
 
 view : Reading -> Html msg
 view reading =
-    H.div [] []
+    H.div [] [ H.text (url reading.time) ]
+
+
+
+-- HELPERS
+
+
+url : Time -> String
+url time =
+    let
+        readingTime =
+            ReadingTime.translated (ReadingTime.fromTime time)
+    in
+        String.toLower
+            (List.foldr
+                (++)
+                ""
+                [ "/meditation/readings/"
+                , readingTime.month
+                , "_"
+                , (String.padLeft 2 '0' readingTime.day)
+                , "_"
+                , readingTime.timeOfDay
+                , ".json"
+                ]
+            )

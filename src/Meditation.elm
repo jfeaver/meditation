@@ -8,7 +8,7 @@ import Html as H exposing (Html)
 import Html.Events as HE
 import Html.App
 import Task
-import TimeOfDay
+import ReadingTime
 
 
 -- MODEL
@@ -87,7 +87,7 @@ update msg model =
                     ! [ Cmd.map (ToDatePicker False) datePickerCmd ]
 
         ToggleTimeOfDay ->
-            ( model, setTime model.time (TimeOfDay.toggle model.time) )
+            ( model, setTime model.time (ReadingTime.toggle model.time) )
 
         ToDatePicker doSetTime msg ->
             let
