@@ -2,12 +2,14 @@ module Meditation exposing (..)
 
 import Time exposing (Time)
 import Date exposing (Date)
-import DatePicker exposing (DatePicker)
-import Reading exposing (Reading)
+import Task
 import Html as H exposing (Html)
 import Html.Events as HE
 import Html.App
-import Task
+import Http
+import DatePicker exposing (DatePicker)
+import Reading exposing (Reading)
+import Reading.Request
 import ReadingTime
 
 
@@ -48,7 +50,7 @@ initTime =
 type Msg
     = SetTime Time Time
     | SetReading Reading
-    | AlertReadingLoadError Time Time
+    | AlertReadingLoadError Time Http.Error
     | ToDatePicker Bool DatePicker.Msg
     | ToggleTimeOfDay
 
@@ -58,7 +60,7 @@ update msg model =
     case msg of
         SetTime previousTime time ->
             ( { model | time = time }
-            , Task.perform (AlertReadingLoadError previousTime) SetReading (Reading.get time)
+            , Task.perform (AlertReadingLoadError previousTime) SetReading (Reading.Request.get time)
             )
 
         SetReading reading ->
@@ -133,5 +135,5 @@ view model =
         [ H.text (toString model.time)
         , H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
         , Html.App.map (ToDatePicker True) (DatePicker.view model.datePicker)
-        , Reading.view model.reading
+        , Reading.view model.time model.reading
         ]

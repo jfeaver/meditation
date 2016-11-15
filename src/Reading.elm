@@ -1,24 +1,24 @@
 module Reading
     exposing
         ( Reading
+        , Verse
+        , Reference
         , none
-        , get
         , view
         )
 
-import Time exposing (Time)
 import Html as H exposing (Html)
-import Task exposing (Task)
+import Html.Attributes as HA
+import Time exposing (Time)
+import Json.Encode
 import ReadingTime
-import String
 
 
 -- MODEL
 
 
 type alias Reading =
-    { time : Time
-    , verses : List Verse
+    { verses : List Verse
     , paragraphs : List String
     }
 
@@ -38,50 +38,66 @@ type alias Reference =
 
 none : Reading
 none =
-    { time = 0
-    , verses = []
+    { verses = []
     , paragraphs = []
     }
-
-
-
--- EFFECTS
-
-
-get : Time -> Task Time Reading
-get time =
-    Task.succeed { none | time = time }
 
 
 
 -- VIEW
 
 
-view : Reading -> Html msg
-view reading =
-    H.div [] [ H.text (url reading.time) ]
+view : Time -> Reading -> Html msg
+view time reading =
+    H.div [ HA.class "article" ]
+        [ H.h2 [] [ H.text <| title time ]
+        , H.div [ HA.class "verses" ]
+            (List.map verse reading.verses)
+        , H.div [ HA.class "reading-body" ]
+            (List.map paragraph reading.paragraphs)
+        ]
 
 
-
--- HELPERS
-
-
-url : Time -> String
-url time =
+title : Time -> String
+title time =
     let
         readingTime =
             ReadingTime.translated (ReadingTime.fromTime time)
     in
-        String.toLower
-            (List.foldr
-                (++)
-                ""
-                [ "/meditation/readings/"
-                , readingTime.month
-                , "_"
-                , (String.padLeft 2 '0' readingTime.day)
-                , "_"
-                , readingTime.timeOfDay
-                , ".json"
-                ]
-            )
+        List.foldr (++)
+            ""
+            [ "Reading for: "
+            , readingTime.timeOfDay
+            , ", "
+            , readingTime.month
+            , " "
+            , toString readingTime.day
+            ]
+
+
+verse : Verse -> Html msg
+verse verse =
+    H.blockquote
+        []
+        [ H.p [] [ H.text verse.passage ]
+        , H.p
+            [ HA.class "citation"
+            ]
+            [ H.text
+                (List.foldr (++)
+                    ""
+                    [ "-"
+                    , verse.reference.book
+                    , " "
+                    , verse.reference.chapter
+                    , ":"
+                    , verse.reference.verse
+                    ]
+                )
+            ]
+        ]
+
+
+paragraph : String -> Html msg
+paragraph readingParagraph =
+    H.p [ HA.property "innerHTML" (Json.Encode.string readingParagraph) ] []
