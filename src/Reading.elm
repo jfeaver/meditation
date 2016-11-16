@@ -61,17 +61,17 @@ view time reading =
 title : Time -> String
 title time =
     let
-        readingTime =
+        tReadingTime =
             ReadingTime.translated (ReadingTime.fromTime time)
     in
         List.foldr (++)
             ""
             [ "Reading for: "
-            , readingTime.timeOfDay
+            , tReadingTime.timeOfDay
             , ", "
-            , readingTime.month
+            , tReadingTime.month
             , " "
-            , toString readingTime.day
+            , tReadingTime.day
             ]
 
 

@@ -24,14 +24,24 @@ type alias TranslatedReadingTime =
     }
 
 
+increment : Time -> Time
+increment time =
+    time + 12 * Time.hour
+
+
+decrement : Time -> Time
+decrement time =
+    time - 12 * Time.hour
+
+
 toggle : Time -> Time
 toggle time =
     case (timeOfDay time) of
         Morning ->
-            time + 12 * Time.hour
+            increment time
 
         Evening ->
-            time - 12 * Time.hour
+            decrement time
 
 
 timeOfDay : Time -> TimeOfDay

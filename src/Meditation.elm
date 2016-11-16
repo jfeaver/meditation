@@ -132,8 +132,9 @@ datePickerFollowUp doSetTime mDate model =
 view : Model -> Html Msg
 view model =
     H.div []
-        [ H.text (toString model.time)
-        , H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
+        [ H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
         , Html.App.map (ToDatePicker True) (DatePicker.view model.datePicker)
+        , H.div [ HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ] [ H.text ">" ]
+        , H.div [ HE.onClick <| SetTime model.time (ReadingTime.decrement model.time) ] [ H.text "<" ]
         , Reading.view model.time model.reading
         ]
