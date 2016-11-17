@@ -12,6 +12,7 @@ import DatePicker exposing (DatePicker)
 import Reading exposing (Reading)
 import Reading.Request
 import ReadingTime
+import FA
 
 
 -- MODEL
@@ -142,13 +143,31 @@ view : Model -> Html Msg
 view model =
     H.div []
         [ H.div []
-            [ H.span [ HE.onClick ToggleTimeSelect ] [ H.text "calendar" ]
+            [ H.span [ HE.onClick ToggleTimeSelect ]
+                [ FA.fa "cog" (Just "cog")
+                ]
             , H.div [ HA.class "time-select", HA.hidden (not model.isShowingTimeSelect) ]
-                [ H.span [ HE.onClick ToggleTimeOfDay ] [ H.text "Toggle" ]
+                [ H.span [ HE.onClick ToggleTimeOfDay ]
+                    [ timeOfDayToggle model.time
+                    ]
                 , Html.App.map (ToDatePicker True) (DatePicker.view model.datePicker)
                 ]
             ]
-        , H.div [ HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ] [ H.text ">" ]
-        , H.div [ HE.onClick <| SetTime model.time (ReadingTime.decrement model.time) ] [ H.text "<" ]
+        , H.div [ HA.class "time-increment", HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ]
+            [ FA.fa "chevron-right" (Just ">")
+            ]
+        , H.div [ HA.class "time-decrement", HE.onClick <| SetTime model.time (ReadingTime.decrement model.time) ]
+            [ FA.fa "chevron-left" (Just "<")
+            ]
         , Reading.view model.time model.reading
         ]
+
+
+timeOfDayToggle : Time -> Html Msg
+timeOfDayToggle time =
+    case (ReadingTime.fromTime time |> .timeOfDay) of
+        ReadingTime.Morning ->
+            FA.fa "moon-o" (Just "moon")
+
+        ReadingTime.Evening ->
+            FA.fa "sun-o" (Just "sun")
