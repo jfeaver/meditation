@@ -6,7 +6,7 @@ import Task
 import Html as H exposing (Html)
 import Html.Events as HE
 import Html.Attributes as HA
-import Html.App
+import Html
 import Http
 import DatePicker exposing (DatePicker)
 import Reading exposing (Reading)
@@ -29,15 +29,15 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        ( datePicker', datePickerCmd ) =
+        ( datePicker, datePickerCmd ) =
             DatePicker.init DatePicker.defaultSettings
     in
         { time = initTime
         , reading = Reading.none
-        , datePicker = datePicker'
+        , datePicker = datePicker
         , isShowingTimeSelect = False
         }
-            ! [ Task.perform identity (SetTime initTime) Time.now
+            ! [ Task.perform (SetTime initTime) Time.now
               , Cmd.map (ToDatePicker True) datePickerCmd
               ]
 
@@ -53,8 +53,7 @@ initTime =
 
 type Msg
     = SetTime Time Time
-    | SetReading Reading
-    | AlertReadingLoadError Time Http.Error
+    | NewReading Time (Result Http.Error Reading)
     | ToDatePicker Bool DatePicker.Msg
     | ToggleTimeOfDay
     | ToggleTimeSelect
@@ -65,15 +64,15 @@ update msg model =
     case msg of
         SetTime previousTime time ->
             ( { model | time = time }
-            , Task.perform (AlertReadingLoadError previousTime) SetReading (Reading.Request.get time)
+            , Http.send (NewReading previousTime) (Reading.Request.get time)
             )
 
-        SetReading reading ->
+        NewReading _ (Ok reading) ->
             ( { model | reading = reading }
             , Cmd.none
             )
 
-        AlertReadingLoadError previousTime failedTime ->
+        NewReading previousTime (Err _) ->
             let
                 mDate =
                     if previousTime == initTime then
@@ -98,13 +97,13 @@ update msg model =
 
         ToDatePicker doSetTime msg ->
             let
-                ( datePicker', datePickerCmd, mDate ) =
+                ( datePicker, datePickerCmd, mDate ) =
                     DatePicker.update msg model.datePicker
 
                 commands =
                     datePickerFollowUp doSetTime mDate model
             in
-                { model | datePicker = datePicker' }
+                { model | datePicker = datePicker }
                     ! List.append commands [ Cmd.map (ToDatePicker doSetTime) datePickerCmd ]
 
         ToggleTimeSelect ->
@@ -119,7 +118,7 @@ update msg model =
 
 setTime : Time -> Time -> Cmd Msg
 setTime previousTime newTime =
-    Task.perform identity (SetTime previousTime) (Task.succeed newTime)
+    Task.perform (SetTime previousTime) (Task.succeed newTime)
 
 
 datePickerFollowUp : Bool -> Maybe Date -> Model -> List (Cmd Msg)
@@ -150,7 +149,7 @@ view model =
                 [ H.span [ HE.onClick ToggleTimeOfDay ]
                     [ timeOfDayToggle model.time
                     ]
-                , Html.App.map (ToDatePicker True) (DatePicker.view model.datePicker)
+                , Html.map (ToDatePicker True) (DatePicker.view model.datePicker)
                 ]
             ]
         , H.div [ HA.class "time-increment", HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ]

@@ -1,11 +1,11 @@
 port module MeditationMain exposing (main)
 
-import Html.App
+import Html
 import Meditation
 
 
 main =
-    Html.App.program
+    Html.program
         { init = Meditation.init
         , update = Meditation.update
         , subscriptions = always Sub.none

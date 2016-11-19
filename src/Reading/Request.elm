@@ -9,12 +9,12 @@ import Reading exposing (Reading)
 import ReadingTime
 
 
--- EFFECTS
+-- REQUESTS
 
 
-get : Time -> Task Http.Error Reading
+get : Time -> Http.Request Reading
 get time =
-    Http.get decodeReading (url time)
+    Http.get (url time) decodeReading
 
 
 
@@ -23,24 +23,24 @@ get time =
 
 decodeReading : Decoder Reading
 decodeReading =
-    object2 Reading
-        ("verses" := list decodeVerse)
-        ("reading" := list string)
+    map2 Reading
+        (field "verses" (list decodeVerse))
+        (field "reading" (list string))
 
 
 decodeVerse : Decoder Reading.Verse
 decodeVerse =
-    object2 Reading.Verse
-        ("passage" := string)
-        ("reference" := decodeReference)
+    map2 Reading.Verse
+        (field "passage" string)
+        (field "reference" decodeReference)
 
 
 decodeReference : Decoder Reading.Reference
 decodeReference =
-    object3 Reading.Reference
-        ("book" := string)
-        ("chapter" := string)
-        ("verse" := string)
+    map3 Reading.Reference
+        (field "book" string)
+        (field "chapter" string)
+        (field "verse" string)
 
 
 
@@ -54,9 +54,7 @@ url time =
             ReadingTime.translated (ReadingTime.fromTime time)
     in
         String.toLower
-            (List.foldr
-                (++)
-                ""
+            (String.concat
                 [ "/meditation/readings/"
                 , readingTime.month
                 , "_"
