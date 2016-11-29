@@ -141,22 +141,26 @@ datePickerFollowUp doSetTime mDate model =
 view : Model -> Html Msg
 view model =
     H.div []
-        [ H.div []
-            [ H.span [ HE.onClick ToggleTimeSelect ]
-                [ FA.fa "cog"
+        [ H.div [ HA.class "tool" ]
+            [ H.div [ HA.class "tool-action" ]
+                [ H.span [ HE.onClick ToggleTimeSelect ]
+                    [ FA.fa "cog"
+                    ]
                 ]
-            , H.div [ HA.class "time-select", HA.hidden (not model.isShowingTimeSelect) ]
-                [ H.span [ HE.onClick ToggleTimeOfDay ]
-                    [ timeOfDayToggle model.time
+            , H.div [ HA.class "time-select-container", HA.hidden (not model.isShowingTimeSelect) ]
+                [ H.div [ HA.class "time-select-nearby-selectors" ]
+                    [ H.div [ HA.class "time-decrement", HE.onClick <| SetTime model.time (ReadingTime.decrement model.time) ]
+                        [ FA.fa "chevron-left"
+                        ]
+                    , H.span [ HE.onClick ToggleTimeOfDay ]
+                        [ timeOfDayToggle model.time
+                        ]
+                    , H.div [ HA.class "time-increment", HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ]
+                        [ FA.fa "chevron-right"
+                        ]
                     ]
                 , Html.map (ToDatePicker True) (DatePicker.view model.datePicker)
                 ]
-            ]
-        , H.div [ HA.class "time-increment", HE.onClick <| SetTime model.time (ReadingTime.increment model.time) ]
-            [ FA.fa "chevron-right"
-            ]
-        , H.div [ HA.class "time-decrement", HE.onClick <| SetTime model.time (ReadingTime.decrement model.time) ]
-            [ FA.fa "chevron-left"
             ]
         , Reading.view model.time model.reading
         ]
@@ -166,7 +170,7 @@ timeOfDayToggle : Time -> Html Msg
 timeOfDayToggle time =
     case (ReadingTime.fromTime time |> .timeOfDay) of
         ReadingTime.Morning ->
-            FA.fa "moon-o"
+            FA.fa "sun-o"
 
         ReadingTime.Evening ->
-            FA.fa "sun-o"
+            FA.fa "moon-o"
